@@ -8,6 +8,27 @@ provides the original calendar and weather layout. Illustrated designs and the
 Customize interface are interactive HTML prototypes, pending their QML implementation.
 The repository has not been submitted to the Omarchy plugin marketplace.
 
+## Opinionated by default. Malleable by design.
+
+Worldscape should feel carefully composed the first time you open it: considered
+spacing, readable information, expressive weather, and a palette that belongs on
+your desktop. The default is our best recipe, ready to enjoy without setup.
+
+A small **Customize** menu will offer the useful everyday adjustments: compact or
+expanded weather, clocks and calendar; show or hide the calendar; choose cities,
+units, and what appears in the bar, including its date/time format. A few curated
+visual designs can share those choices. Each adjustment should still produce a
+coherent result, without making you design the widget yourself.
+
+Beyond that menu, the source is yours to reshape, by hand or with your agent.
+Change the artwork, layout, interactions, data sources, or the whole composition.
+The menu is a convenience, not the boundary of what Worldscape can become—in the
+spirit of Omarchy and a Linux desktop you can make your own.
+
+These are product principles and intended behavior; the native customization
+menu is still in development. See [the design principles](docs/PRINCIPLES.md)
+for the decisions that guide implementation.
+
 ## Install the development version
 
 Requires Omarchy's Quickshell-based shell (baseline: Omarchy 4.0.4), Python 3.9+
