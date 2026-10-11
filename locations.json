@@ -1,0 +1,34 @@
+[
+  {
+    "city": "Toronto",
+    "region": "Canada \u00b7 Eastern",
+    "zone": "America/Toronto",
+    "latitude": 43.6532,
+    "longitude": -79.3832,
+    "country": "Canada"
+  },
+  {
+    "city": "Silicon Valley",
+    "region": "San Jose, California \u00b7 Pacific",
+    "zone": "America/Los_Angeles",
+    "latitude": 37.33939,
+    "longitude": -121.89496,
+    "country": "United States"
+  },
+  {
+    "city": "London",
+    "region": "United Kingdom",
+    "zone": "Europe/London",
+    "latitude": 51.5074,
+    "longitude": -0.1278,
+    "country": "United Kingdom"
+  },
+  {
+    "city": "Vadodara",
+    "region": "Gujarat, India \u00b7 IST",
+    "zone": "Asia/Kolkata",
+    "latitude": 22.29941,
+    "longitude": 73.20812,
+    "country": "India"
+  }
+]

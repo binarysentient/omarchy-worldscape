@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.binarysentient.worldscape",
+  "name": "Worldscape",
+  "version": "0.1.0",
+  "author": "binarysentient",
+  "description": "Calendar, world clocks and city weather for the Omarchy shell",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Worldscape",
+    "description": "Calendar, world clocks and city weather for the Omarchy shell",
+    "category": "Time",
+    "allowMultiple": false
+  }
+}
