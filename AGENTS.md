@@ -32,3 +32,13 @@ No agent service is required at runtime.
 
 Avoid committing credentials, personal location caches, session data or backups.
 Document limitations honestly and preserve upstream license attribution.
+
+## Commit attribution
+
+Keep the user's Git identity as the primary author and include a co-author trailer
+for each agent that contributed to the changes. Codex-created commits end with:
+
+    Co-authored-by: Codex <noreply@openai.com>
+
+Other agents use their own attribution identity. Preserve existing valid trailers
+and avoid duplicates. Do not rewrite published history without user authorization.
