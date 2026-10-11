@@ -56,6 +56,14 @@ button. Keep multiple designs and adjust each design independently; these choice
 are saved in that browser's local storage, not in your live desktop configuration.
 The data and date in this prototype are illustrative, not live forecasts.
 
+### Independent design studies
+
+[Open the comparison page](docs/design-studies/index.html) locally to explore
+independent concepts by Claude Opus 5.5 and GPT-6.1 Sol, both at medium effort.
+Each proposes Auto matching for representative Omarchy palettes and custom themes,
+with weather/daytime artwork and a small set of quick adjustments. These remain
+prototypes; the native plugin does not implement theme matching or these scenes yet.
+
 ## Locations and privacy
 
 `locations.json` currently defines four example cities, their IANA timezones and

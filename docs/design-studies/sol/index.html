@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Worldscape — Horizon / Sol study</title>
+<style>
+*{box-sizing:border-box} :root{--bg:#1a1b26;--surface:#24283b;--fg:#c0caf5;--accent:#7aa2f7;--muted:#a9b1d6;--line:#ffffff18}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-sans-serif,system-ui,sans-serif;transition:background .6s,color .6s}button,select,input{font:inherit}button,select{color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 11px;cursor:pointer}button:hover{border-color:var(--accent)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:4px}button.primary{background:var(--accent);color:var(--bg)}header{display:flex;justify-content:space-between;align-items:center;padding:22px 5vw;border-bottom:1px solid var(--line)}.brand{font-size:15px;letter-spacing:.02em}.brand b{font-weight:550}.brand span{opacity:.5;margin-left:16px}.bar{font:12px ui-monospace,monospace;display:flex;gap:18px;align-items:center}.bar i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:8px}main{max-width:1300px;margin:auto;padding:48px 5vw 30px}.eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:.2em;color:var(--muted)}.intro{display:flex;align-items:end;justify-content:space-between;margin-bottom:24px}.intro h1{font:400 38px/1.2 Georgia,serif;letter-spacing:-.04em;margin:7px 0 0}.intro p{margin:0;max-width:280px;color:var(--muted);font-size:12px}.widget{border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 24px 90px #0002}.hero{height:340px;position:relative;isolation:isolate;background:#1f333e;overflow:hidden;color:#fff5de}.hero .scene{position:absolute;inset:0;z-index:-2}.scene svg{display:block;width:100%;height:100%}.hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#07131c69,transparent 65%),linear-gradient(0deg,#06131c85,transparent 40%)}.hero-head{display:flex;justify-content:space-between;padding:26px 30px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}.hero-head span:last-child{opacity:.8}.hero-clock{padding:6px 30px}.hero-clock .time{font:400 clamp(68px,9vw,112px)/1 Georgia,serif;letter-spacing:-.065em;font-variant-numeric:tabular-nums}.hero-clock .time small{font:13px system-ui;letter-spacing:0;margin-left:12px}.hero-clock p{margin:10px 0;color:#fff7e2d0;font-size:13px}.hero-foot{position:absolute;bottom:25px;left:30px;right:30px;display:flex;justify-content:space-between;align-items:end}.weather-number{font:32px Georgia,serif}.weather-number small{font:12px system-ui;opacity:.85;margin-left:12px}.sun-note{font:11px ui-monospace,monospace;text-align:right;color:#fff8e3c9}.lower{display:grid;grid-template-columns:1fr 270px;background:var(--bg)}.world{padding:26px 30px}.section-label{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}.cities{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.city{min-width:0}.mini{height:75px;overflow:hidden;position:relative;border-radius:5px;margin-bottom:12px}.mini .scene{height:100%}.city-top{display:flex;justify-content:space-between;align-items:center}.city-name{font-size:12px;font-weight:550}.difference{font-size:10px;color:var(--muted)}.city-time{font:32px Georgia,serif;letter-spacing:-.025em;margin:4px 0}.city-time small{font:10px system-ui;letter-spacing:0}.city-meta{font-size:11px;color:var(--muted)}.forecast{display:flex;border-top:1px solid var(--line);padding-top:18px;margin-top:25px;gap:28px}.forecast div{font-size:11px;color:var(--muted)}.forecast b{display:block;color:var(--fg);font-size:12px;font-weight:500;margin-top:4px}.calendar{border-left:1px solid var(--line);padding:26px 24px}.month{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font:17px Georgia,serif}.month button{padding:1px 7px;border:0;background:none}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;font-size:11px}.calendar-grid span{height:23px;display:grid;place-items:center}.calendar-grid .weekday{color:var(--muted);font-size:10px}.calendar-grid .today{background:var(--accent);color:var(--bg);border-radius:50%}.calendar-grid .faded{opacity:.25}.calendar-note{border-top:1px solid var(--line);padding-top:15px;margin-top:16px;font-size:11px;color:var(--muted)}.calendar-note b{color:var(--fg);display:block;font-weight:500;margin-bottom:3px}.widget-footer{padding:12px 30px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.lab{margin-top:30px;border-top:1px solid var(--line);padding-top:22px}.lab-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.lab-title p{margin:0;font-size:11px;color:var(--muted)}.controls{display:grid;grid-template-columns:1.3fr 1fr 1fr 1.3fr;gap:20px}.control{display:flex;flex-direction:column;gap:7px;font-size:11px;color:var(--muted)}.control select{width:100%;font-size:12px}.control input[type=range]{width:100%;accent-color:var(--accent);height:24px}.control .caption{font-size:10px}.match{margin-top:17px;display:flex;gap:10px;align-items:center;font-size:11px;color:var(--muted)}.match b{font-weight:500;color:var(--fg)}.swatches{display:flex}.swatches i{width:15px;height:15px;border-radius:50%;border:2px solid var(--bg);margin-left:-3px}.custom-palette{display:none;gap:16px;padding:16px 0}.custom-palette label{font-size:11px;color:var(--muted)}input[type=color]{display:block;width:80px;height:30px;border:1px solid var(--line);padding:2px;background:var(--bg);border-radius:4px}details{margin-top:20px;font-size:11px;color:var(--muted)}summary{cursor:pointer;display:inline-block;border-bottom:1px dotted var(--muted)}.quiet-note{font-size:10px;color:var(--muted);margin-top:26px;display:flex;justify-content:space-between}.paused *{animation-play-state:paused!important}.drift{animation:drift 22s ease-in-out infinite alternate;transform-origin:center}.rainfall{animation:rain 1.6s linear infinite}.snowfall{animation:rain 10s linear infinite}.lightning{animation:flash 9s infinite;opacity:0}@keyframes drift{to{transform:translateX(18px)}}@keyframes rain{to{transform:translate(-20px,42px)}}@keyframes flash{0%,92%,96%,100%{opacity:0}93%,95%{opacity:.9}}.compact .hero{height:255px}.compact .hero-clock .time{font-size:78px}.compact .hero-head{padding-top:18px}.compact .hero-foot{bottom:18px}.compact .mini,.compact .forecast{display:none}.compact .world,.compact .calendar{padding-top:20px;padding-bottom:20px}.compact .calendar-note{display:none}.no-calendar .lower{grid-template-columns:1fr}.no-calendar .calendar{display:none}dialog{max-width:470px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:13px;background:var(--bg);color:var(--fg);padding:26px;box-shadow:0 35px 150px #0008}dialog::backdrop{background:#0007;backdrop-filter:blur(4px)}dialog h2{font:28px Georgia;margin:0 0 6px}dialog p{font-size:12px;color:var(--muted);margin:0 0 23px}.setting{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 0;border-top:1px solid var(--line);font-size:12px}.setting select{font-size:11px;max-width:210px}.dialog-foot{display:flex;justify-content:space-between;margin-top:25px}.dialog-foot button{font-size:12px}input[type=checkbox]{accent-color:var(--accent)}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}@media(max-width:850px){main{padding-top:28px}.lower{grid-template-columns:1fr 230px}.world{padding:22px}.cities{gap:12px}.calendar{padding:22px 17px}.controls{grid-template-columns:1fr 1fr}.bar span{display:none}.intro p{display:none}.city-time{font-size:27px}.hero{height:310px}}@media(max-width:620px){header{padding:16px 5vw}.brand span{display:none}.lower{grid-template-columns:1fr}.calendar{border-left:0;border-top:1px solid var(--line);padding:22px 30px}.calendar-grid{max-width:300px;margin:auto}.calendar-note{display:none}.hero-head,.hero-clock{padding-left:22px;padding-right:22px}.hero-foot{left:22px;right:22px}.hero-clock .time{font-size:80px}.hero-clock{padding-top:14px}.sun-note{max-width:120px}.hero{height:300px}.intro h1{font-size:32px}.world{padding:22px}.cities{gap:14px}.city-top{display:block}.difference{display:block}.city-time{font-size:26px}.city-meta{font-size:10px}.forecast{gap:18px}.widget-footer{padding:12px 22px;font-size:9px}.widget-footer span:last-child{display:none}.match{flex-wrap:wrap}.quiet-note{display:block}.quiet-note span{display:block}.controls{gap:14px}.compact .hero{height:260px}}
+</style></head><body>
+<header><div class="brand"><b>◒ Worldscape</b><span>Horizon / Sol study</span></div><div class="bar"><span id="bar-preview"></span><button id="customize">Customize ↗</button></div></header>
+<main><div class="intro"><div><div class="eyebrow">A window on your day</div><h1>The world, in this moment.</h1></div><p>Different skies. The same moment.<br>A little closer to everywhere.</p></div>
+<section class="widget" id="widget" aria-label="World clock and weather preview"><div class="hero"><div class="scene" id="hero-scene"></div><div class="hero-head"><span>Toronto <span style="opacity:.6">/ Home</span></span><span id="mood-label"></span></div><div class="hero-clock"><div class="time" id="home-time"></div><p id="date-label">Sunday, October 11</p></div><div class="hero-foot"><div class="weather-number" id="home-weather"></div><div class="sun-note" id="sun-note"></div></div></div>
+<div class="lower"><div class="world"><div class="section-label"><span>Elsewhere</span><span>One shared moment</span></div><div class="cities" id="cities"></div><div class="forecast" id="forecast"></div></div><aside class="calendar"><div class="month"><span id="month-label"></span><div><button id="previous-month" aria-label="Previous month">‹</button><button id="next-month" aria-label="Next month">›</button></div></div><div class="calendar-grid" id="calendar"></div><div class="calendar-note"><b>Room to breathe.</b>No rush. It's Sunday.</div></aside></div><div class="widget-footer"><span>Illustrative weather · last updated 2 min ago</span><span>Sunday 11 October 2026 · offline study</span></div></section>
+<section class="lab" aria-label="Design study simulation"><div class="lab-title"><div class="eyebrow">Try another atmosphere</div><p>Preview controls · not live settings</p></div><div class="controls"><label class="control">Desktop theme<select id="theme"></select><span class="caption">Representative installed Omarchy themes</span></label><label class="control">Appearance<select id="recipe"><option value="auto">Auto · match my desktop</option><option value="mineral">Mineral · cool, translucent</option><option value="ink">Ink · deep, saturated</option><option value="paper">Paper · warm, tactile</option></select></label><label class="control">Toronto weather<select id="weather"><option value="clear">Clear skies</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="fog">Fog</option><option value="storm">Thunderstorm</option></select></label><label class="control">Toronto time <span id="hour-label"></span><input id="hour" type="range" min="0" max="23" step="1" value="17"><span class="caption">World clocks move together</span></label></div><div class="custom-palette" id="custom-palette"><label>Background<input type="color" id="custom-bg" value="#202d29"></label><label>Foreground<input type="color" id="custom-fg" value="#d7d4b6"></label><label>Accent<input type="color" id="custom-accent" value="#91b79a"></label></div><div class="match"><span class="swatches" id="swatches"></span><span id="match-label"></span></div><details><summary>Combine the recipe</summary><div class="controls" style="margin-top:15px"><label class="control">Landscape color<select id="landscape"><option value="theme">From my desktop</option><option value="natural">Natural sky colors</option><option value="everforest">Everforest landscape</option><option value="gruvbox">Gruvbox landscape</option><option value="nord">Nord landscape</option></select></label><div class="control" style="grid-column:span 2;justify-content:center">Keep your desktop colors for the interface; borrow another palette for the landscape. Daylight and weather still lead.</div></div></details></section>
+<div class="quiet-note"><span>Horizon · an independent design opinion by Sol</span><span>Self-contained artwork · no network requests · source is the recipe</span></div></main>
+<dialog id="settings"><h2>Make room for your day.</h2><p>A few useful adjustments. The rest is already composed.</p><label class="setting">Composition<select id="density"><option value="expanded">Expanded · skies & outlook</option><option value="compact">Compact · a quick glance</option></select></label><label class="setting">Show calendar<input id="show-calendar" type="checkbox" checked></label><label class="setting">Clock format<select id="format"><option value="24">24-hour · 17:00</option><option value="12">12-hour · 5:00 PM</option></select></label><label class="setting">Temperature<select id="units"><option value="c">Celsius · 16°</option><option value="f">Fahrenheit · 61°</option></select></label><label class="setting">In the bar<select id="bar-content"><option value="all">Sun 11 Oct · 17:00 · 16°</option><option value="clock">Time only · 17:00</option><option value="date">Date & time · Sun 11 Oct · 17:00</option></select></label><label class="setting">Gentle motion<input id="motion" type="checkbox" checked></label><div class="dialog-foot"><button id="reset">Restore defaults</button><button id="done" class="primary">Done</button></div></dialog>
+<script>
+const THEMES={
+  "tokyo-night": {
+    "mode": "dark",
+    "accent": "#7aa2f7",
+    "selection": "#292e42",
+    "muted": "#414868",
+    "background": "#1a1b26",
+    "dark_background": "#13141c",
+    "darker_background": "#0e0e14",
+    "lighter_background": "#24283b",
+    "foreground": "#a9b1d6",
+    "dark_foreground": "#565f89",
+    "light_foreground": "#b4bee6",
+    "bright_foreground": "#c0caf5",
+    "red": "#f7768e",
+    "yellow": "#e0af68",
+    "orange": "#eb927b",
+    "green": "#9ece6a",
+    "cyan": "#449dab",
+    "blue": "#7aa2f7",
+    "magenta": "#ad8ee6",
+    "brown": "#75493d",
+    "bright_red": "#ff7a93",
+    "bright_yellow": "#ff9e64",
+    "bright_green": "#b9f27c",
+    "bright_cyan": "#0db9d7",
+    "bright_blue": "#7da6ff",
+    "bright_magenta": "#bb9af7"
+  },
+  "catppuccin": {
+    "mode": "dark",
+    "accent": "#89b4fa",
+    "selection": "#45475a",
+    "muted": "#585b70",
+    "background": "#1e1e2e",
+    "dark_background": "#161622",
+    "darker_background": "#101019",
+    "lighter_background": "#313244",
+    "foreground": "#cdd6f4",
+    "dark_foreground": "#6c7086",
+    "light_foreground": "#bac2de",
+    "bright_foreground": "#cdd6f4",
+    "red": "#f38ba8",
+    "yellow": "#f9e2af",
+    "orange": "#f6b6ab",
+    "green": "#a6e3a1",
+    "cyan": "#94e2d5",
+    "blue": "#89b4fa",
+    "magenta": "#f5c2e7",
+    "brown": "#7b5b55",
+    "bright_red": "#f38ba8",
+    "bright_yellow": "#f9e2af",
+    "bright_green": "#a6e3a1",
+    "bright_cyan": "#94e2d5",
+    "bright_blue": "#89b4fa",
+    "bright_magenta": "#f5c2e7"
+  },
+  "gruvbox": {
+    "mode": "dark",
+    "accent": "#7daea3",
+    "selection": "#504945",
+    "muted": "#665c54",
+    "background": "#282828",
+    "dark_background": "#1e1e1e",
+    "darker_background": "#161616",
+    "lighter_background": "#3c3836",
+    "foreground": "#d4be98",
+    "dark_foreground": "#7c6f64",
+    "light_foreground": "#bdae93",
+    "bright_foreground": "#d4be98",
+    "red": "#ea6962",
+    "yellow": "#d8a657",
+    "orange": "#e1875c",
+    "green": "#a9b665",
+    "cyan": "#89b482",
+    "blue": "#7daea3",
+    "magenta": "#d3869b",
+    "brown": "#70432e",
+    "bright_red": "#ea6962",
+    "bright_yellow": "#d8a657",
+    "bright_green": "#a9b665",
+    "bright_cyan": "#89b482",
+    "bright_blue": "#7daea3",
+    "bright_magenta": "#d3869b"
+  },
+  "nord": {
+    "mode": "dark",
+    "accent": "#81a1c1",
+    "selection": "#434c5e",
+    "muted": "#4c566a",
+    "background": "#2e3440",
+    "dark_background": "#222730",
+    "darker_background": "#191c23",
+    "lighter_background": "#3b4252",
+    "foreground": "#d8dee9",
+    "dark_foreground": "#667080",
+    "light_foreground": "#adb5c4",
+    "bright_foreground": "#d8dee9",
+    "red": "#bf616a",
+    "yellow": "#ebcb8b",
+    "orange": "#d5967a",
+    "green": "#a3be8c",
+    "cyan": "#88c0d0",
+    "blue": "#81a1c1",
+    "magenta": "#b48ead",
+    "brown": "#6a4b3d",
+    "bright_red": "#bf616a",
+    "bright_yellow": "#ebcb8b",
+    "bright_green": "#a3be8c",
+    "bright_cyan": "#8fbcbb",
+    "bright_blue": "#81a1c1",
+    "bright_magenta": "#b48ead"
+  },
+  "osaka-jade": {
+    "mode": "dark",
+    "accent": "#509475",
+    "selection": "#32473B",
+    "muted": "#53685B",
+    "background": "#111c18",
+    "dark_background": "#0c1512",
+    "darker_background": "#090f0d",
+    "lighter_background": "#23372B",
+    "foreground": "#C1C497",
+    "dark_foreground": "#81B8A8",
+    "light_foreground": "#D6D5BC",
+    "bright_foreground": "#F7E8B2",
+    "red": "#FF5345",
+    "yellow": "#459451",
+    "orange": "#a2734b",
+    "green": "#549e6a",
+    "cyan": "#2DD5B7",
+    "blue": "#509475",
+    "magenta": "#D2689C",
+    "brown": "#513925",
+    "bright_red": "#db9f9c",
+    "bright_yellow": "#E5C736",
+    "bright_green": "#63b07a",
+    "bright_cyan": "#8CD3CB",
+    "bright_blue": "#ACD4CF",
+    "bright_magenta": "#75bbb3"
+  },
+  "everforest": {
+    "mode": "dark",
+    "accent": "#7fbbb3",
+    "selection": "#3d484d",
+    "muted": "#475258",
+    "background": "#2d353b",
+    "dark_background": "#21272c",
+    "darker_background": "#181d20",
+    "lighter_background": "#343f44",
+    "foreground": "#d3c6aa",
+    "dark_foreground": "#4f585e",
+    "light_foreground": "#9da9a0",
+    "bright_foreground": "#d3c6aa",
+    "red": "#e67e80",
+    "yellow": "#dbbc7f",
+    "orange": "#e09d7f",
+    "green": "#a7c080",
+    "cyan": "#83c092",
+    "blue": "#7fbbb3",
+    "magenta": "#d699b6",
+    "brown": "#704e3f",
+    "bright_red": "#e67e80",
+    "bright_yellow": "#dbbc7f",
+    "bright_green": "#a7c080",
+    "bright_cyan": "#83c092",
+    "bright_blue": "#7fbbb3",
+    "bright_magenta": "#d699b6"
+  },
+  "catppuccin-latte": {
+    "mode": "light",
+    "accent": "#1e66f5",
+    "selection": "#ccd0da",
+    "muted": "#acb0be",
+    "background": "#eff1f5",
+    "dark_background": "#e3e4e8",
+    "darker_background": "#d7d8dc",
+    "lighter_background": "#dce0e8",
+    "foreground": "#4c4f69",
+    "dark_foreground": "#9ca0b0",
+    "light_foreground": "#5c5f77",
+    "bright_foreground": "#4c4f69",
+    "red": "#d20f39",
+    "yellow": "#df8e1d",
+    "orange": "#d84e2b",
+    "green": "#40a02b",
+    "cyan": "#179299",
+    "blue": "#1e66f5",
+    "magenta": "#ea76cb",
+    "brown": "#6c2715",
+    "bright_red": "#d20f39",
+    "bright_yellow": "#df8e1d",
+    "bright_green": "#40a02b",
+    "bright_cyan": "#179299",
+    "bright_blue": "#1e66f5",
+    "bright_magenta": "#ea76cb"
+  },
+  "flexoki-light": {
+    "mode": "light",
+    "accent": "#205EA6",
+    "selection": "#CECDC3",
+    "muted": "#B7B5AC",
+    "background": "#FFFCF0",
+    "dark_background": "#f2efe4",
+    "darker_background": "#e5e2d8",
+    "lighter_background": "#E6E4D9",
+    "foreground": "#100F0F",
+    "dark_foreground": "#878580",
+    "light_foreground": "#403E3C",
+    "bright_foreground": "#100F0F",
+    "red": "#D14D41",
+    "yellow": "#D0A215",
+    "orange": "#d0772b",
+    "green": "#879A39",
+    "cyan": "#3AA99F",
+    "blue": "#205EA6",
+    "magenta": "#CE5D97",
+    "brown": "#683b15",
+    "bright_red": "#D14D41",
+    "bright_yellow": "#D0A215",
+    "bright_green": "#879A39",
+    "bright_cyan": "#3AA99F",
+    "bright_blue": "#4385BE",
+    "bright_magenta": "#CE5D97"
+  }
+};
+const $=id=>document.getElementById(id);const nice=s=>s.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' ');
+const defaults={theme:'tokyo-night',recipe:'auto',weather:'clear',hour:17,landscape:'theme',density:'expanded',calendar:true,format:'24',units:'c',bar:'all',motion:true,customBg:'#202d29',customFg:'#d7d4b6',customAccent:'#91b79a'};
+let state={...defaults};try{Object.assign(state,JSON.parse(localStorage.getItem('worldscape-sol-v1')||'{}'))}catch{};let monthOffset=0;let sceneId=0;
+const weatherWords={clear:'Clear skies',rain:'Steady rain',snow:'Soft snow',fog:'Low fog',storm:'Thunderstorm'};
+function rgb(hex){return hex.match(/[a-f\d]{2}/gi).map(v=>parseInt(v,16)/255)}
+function linear(x){return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}
+function lab(hex){let [r,g,b]=rgb(hex).map(linear);let l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);return [.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s]}
+function distance(a,b){return lab(a).reduce((sum,x,i)=>sum+(x-lab(b)[i])**2,0)}
+function mix(a,b,t){let ar=rgb(a),br=rgb(b);return '#'+ar.map((x,i)=>Math.round((x*(1-t)+br[i]*t)*255).toString(16).padStart(2,'0')).join('')}
+function luminance(c){let [r,g,b]=rgb(c).map(linear);return .2126*r+.7152*g+.0722*b}
+function contrast(a,b){let l=[luminance(a),luminance(b)].sort((a,b)=>b-a);return (l[0]+.05)/(l[1]+.05)}
+function currentTheme(){if(state.theme!=='custom')return THEMES[state.theme]||THEMES['tokyo-night'];let t={...THEMES.everforest,background:state.customBg,foreground:state.customFg,bright_foreground:state.customFg,accent:state.customAccent};t.mode=luminance(t.background)>.38?'light':'dark';t.lighter_background=mix(t.background,t.foreground,.07);return t}
+function closest(t){return Object.entries(THEMES).map(([name,v])=>({name,score:distance(t.background,v.background)*.4+distance(t.foreground,v.foreground)*.2+distance(t.accent,v.accent)*.4+(t.mode===v.mode?0:.2)})).sort((a,b)=>a.score-b.score)[0].name}
+function material(name){return /gruvbox|flexoki/.test(name)?'paper':/catppuccin|tokyo/.test(name)?'ink':'mineral'}
+function getRecipe(t){return state.recipe==='auto'?material(closest(t)):state.recipe}
+function timeString(hour){return state.format==='12'?`${hour%12||12}:00 <small>${hour>=12?'PM':'AM'}</small>`:`${String(hour).padStart(2,'0')}:00`}
+function temp(c){return `${state.units==='f'?Math.round(c*9/5+32):c}°`}
+function phase(h){return h<6||h>=20?'Nightfall':h<9?'First light':h>=17?'Golden hour':'Daylight'}
+function scene(hour,weather,palette,recipe,mini=false){const id='sky'+sceneId++;const night=hour<6||hour>=20,dusk=hour>=17&&hour<20,dawn=hour>=6&&hour<9,wet=['rain','storm','fog','snow'].includes(weather);const natural=state.landscape==='natural';const accent=natural?'#729aa2':palette.accent;let top=night?mix('#10182d',accent,.2):dusk?mix('#4d6179',accent,.24):dawn?'#7298ab':mix('#78b1c3',accent,.27);let bottom=night?mix('#35405c',accent,.15):dusk?'#e3b88a':dawn?'#e7c39d':'#d5dfcd';if(recipe==='paper'){top=mix(top,'#a79c78',.22);bottom=mix(bottom,'#e4c493',.18)}if(recipe==='ink'){top=mix(top,accent,.25)}if(wet){top=mix(top,night?'#273743':'#6c7b84',.65);bottom=mix(bottom,night?'#40535d':'#a3afa9',.55);if(weather==='storm'){top=mix(top,'#182c3d',.65);bottom=mix(bottom,'#64727c',.5)}}const far=mix(accent,night?'#1c2937':'#708c89',.65),near=mix(accent,'#172f32',.7),front=mix(accent,'#0d2629',.82);let particles='';if(weather==='rain'||weather==='storm'){for(let i=0;i<55;i++){let x=(i*137)%1100,y=(i*83)%340;particles+=`<path d="M${x} ${y}l-6 16"/>`}particles=`<g class="rainfall" stroke="#e2eff0" opacity=".29" stroke-width="1">${particles}</g>`}if(weather==='snow'){for(let i=0;i<48;i++)particles+=`<circle cx="${i*137%1100}" cy="${i*83%340}" r="${1+i%3/2}"/>`;particles=`<g class="snowfall" fill="#fff" opacity=".65">${particles}</g>`}let stars='';if(night&&!wet){for(let i=0;i<35;i++)stars+=`<circle cx="${i*137%1100}" cy="${i*41%180}" r="${.5+i%3*.3}"/>`;stars=`<g fill="#f8edd0" opacity=".6">${stars}</g>`}let sunY=night?82:dusk?163:dawn?155:65;
+return `<svg viewBox="0 0 1100 340" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x2="0" y2="1"><stop stop-color="${top}"/><stop offset="1" stop-color="${bottom}"/></linearGradient><radialGradient id="${id}glow"><stop stop-color="#ffe7ad" stop-opacity=".4"/><stop offset="1" stop-color="#ffe7ad" stop-opacity="0"/></radialGradient><filter id="${id}grain"><feTurbulence baseFrequency=".6" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="1100" height="340" fill="url(#${id})"/>${stars}${!wet?`<circle cx="795" cy="${sunY}" r="140" fill="url(#${id}glow)"/><circle cx="795" cy="${sunY}" r="${night?18:29}" fill="${night?'#e2e5d4':'#fff0bc'}" opacity=".9"/>`:''}<g class="drift" fill="${night?'#586575':'#eef0e1'}" opacity="${wet?.3:.18}"><path d="M470 90Q540 68 610 84T830 81T1100 92V103H470Z"/><path d="M40 144Q130 127 240 139T460 132V147H40Z"/>${wet?'<path d="M0 45Q140 15 290 45T580 37T900 50T1150 30V90H0Z"/>':''}</g><path d="M0 230L90 195 160 215 290 152 390 205 490 180 640 224 760 161 920 219 1040 170 1100 195V340H0Z" fill="${far}" opacity=".58"/><path d="M0 278Q80 230 180 257T380 248T640 265T850 241T1100 265V340H0Z" fill="${near}" opacity=".88"/><path d="M0 305Q130 269 250 300T470 290T720 315T1100 278V340H0Z" fill="${front}"/><path d="M0 326Q230 310 420 325T800 320T1100 330" fill="none" stroke="${bottom}" opacity=".18"/>${weather==='snow'?`<path d="M250 173l40-21 45 24-35-7-14 8-12-11Z" fill="#ecf0e4" opacity=".8"/><path d="M0 305Q130 269 250 300T470 290T720 315T1100 278" fill="none" stroke="#dce9e4" stroke-width="4" opacity=".55"/>`:''}${weather==='fog'?'<g class="drift" fill="#e4e9df" opacity=".35"><path d="M0 225Q250 200 550 232T1100 217V246H0Z"/><path d="M0 279Q200 255 500 275T1100 267V291H0Z"/></g>':''}${particles}${weather==='storm'?'<path class="lightning" d="M870 40l-22 55h25l-35 57 13-46h-24Z" fill="#fff2c5"/>':''}${recipe==='paper'?`<rect width="1100" height="340" filter="url(#${id}grain)" opacity=".035"/>`:''}<g fill="${front}" opacity=".7"><path d="M959 252v-53l-13 24h9l-12 14h12v15zm27 11v-43l-11 20h7l-10 12h10v11z"/></g></svg>`}
+function drawCalendar(){const d=new Date(2026,9+monthOffset,1),days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),start=(d.getDay()+6)%7;$('month-label').textContent=d.toLocaleDateString('en',{month:'long',year:'numeric'});$('calendar').innerHTML=['M','T','W','T','F','S','S'].map(x=>`<span class="weekday">${x}</span>`).join('')+Array.from({length:start},()=>'<span></span>').join('')+Array.from({length:days},(_,i)=>`<span class="${d.getMonth()===9&&d.getFullYear()===2026&&i===10?'today':''}">${i+1}</span>`).join('')}
+function render(){sceneId=0;const t=currentTheme(),near=closest(t),recipe=getRecipe(t),art=THEMES[state.landscape]||t;let fg=t.bright_foreground||t.foreground;if(contrast(fg,t.background)<4.5)fg=luminance(t.background)>.35?'#161616':'#f5f5f5';const root=document.documentElement;root.style.setProperty('--bg',t.background);root.style.setProperty('--surface',t.lighter_background);root.style.setProperty('--fg',fg);root.style.setProperty('--accent',contrast(t.accent,t.background)>=3?t.accent:mix(t.accent,fg,.5));root.style.setProperty('--muted',mix(fg,t.background,.2));root.style.setProperty('--line',mix(t.background,fg,.15));document.body.classList.toggle('paused',!state.motion);$('widget').classList.toggle('compact',state.density==='compact');$('widget').classList.toggle('no-calendar',!state.calendar);$('hero-scene').innerHTML=scene(+state.hour,state.weather,art,recipe);$('home-time').innerHTML=timeString(+state.hour);$('mood-label').textContent=phase(+state.hour);const temperature={clear:16,rain:12,snow:0,fog:9,storm:14}[state.weather];$('home-weather').innerHTML=`${temp(temperature)}<small>${weatherWords[state.weather]}</small>`;$('sun-note').innerHTML=+state.hour>=19||+state.hour<7?'Next sunrise 07:26<br>Make a little room for night.':'Sunset 18:39<br>A little more light to keep.';$('hour-label').textContent=String(state.hour).padStart(2,'0')+':00';$('cities').innerHTML=[['London',5,'rain',12],['Bengaluru',9.5,'clear',24],['Tokyo',13,'clear',20]].map(([name,offset,weather,tempC])=>{let sum=+state.hour+offset,h=Math.floor(sum%24),minutes=offset%1?'30':'00',clock=timeString(h).replace(':00',':'+minutes);return `<article class="city"><div class="mini"><div class="scene">${scene(h,weather,art,recipe,true)}</div></div><div class="city-top"><span class="city-name">${name}</span><span class="difference">+${offset}h${sum>=24?' · tomorrow':''}</span></div><div class="city-time">${clock}</div><div class="city-meta">${temp(tempC)} · ${weatherWords[weather]}</div></article>`}).join('');$('forecast').innerHTML=[['Later today',state.weather,temperature],['Monday','clear',18],['Tuesday','rain',14]].map(([day,w,c])=>`<div>${day}<b>${{clear:'☀',rain:'☂',snow:'❄',fog:'≋',storm:'ϟ'}[w]} &nbsp;${temp(c)} <span style="opacity:.55">${temp(c-6)}</span></b></div>`).join('');$('bar-preview').innerHTML='<i></i>'+(state.bar==='clock'?'': 'Sun 11 Oct · ')+timeString(+state.hour)+(state.bar==='all'?' · '+temp(temperature):'');$('swatches').innerHTML=[t.background,t.foreground,t.accent].map(x=>`<i style="background:${x}"></i>`).join('');$('match-label').innerHTML=state.recipe==='auto'?`<b>Auto → ${nice(recipe)}</b> · ${state.theme==='custom'?'closest palette: '+nice(near):nice(state.theme)} · ${{mineral:'muted, mineral accents',ink:'cool, luminous accents',paper:'warm, earthy tones'}[recipe]} · daylight stays true`:`<b>${nice(recipe)} override</b> · ${nice(state.theme)} interface · ${state.landscape==='theme'?'desktop':nice(state.landscape)} landscape`;$('custom-palette').style.display=state.theme==='custom'?'flex':'none';drawCalendar();try{localStorage.setItem('worldscape-sol-v1',JSON.stringify(state))}catch{}}
+$('theme').innerHTML=Object.keys(THEMES).map(n=>`<option value="${n}">${nice(n)}</option>`).join('')+'<option value="custom">My own theme…</option>';
+const bindings={theme:'theme',recipe:'recipe',weather:'weather',hour:'hour',landscape:'landscape',density:'density','show-calendar':'calendar',format:'format',units:'units','bar-content':'bar',motion:'motion','custom-bg':'customBg','custom-fg':'customFg','custom-accent':'customAccent'};
+function fill(){for(const [id,key]of Object.entries(bindings)){$(id)[$(id).type==='checkbox'?'checked':'value']=state[key]}}
+for(const [id,key]of Object.entries(bindings)){$(id).addEventListener('input',e=>{state[key]=e.target.type==='checkbox'?e.target.checked:e.target.value;render()})}
+$('customize').onclick=()=>$('settings').showModal();$('done').onclick=()=>$('settings').close();$('reset').onclick=()=>{state={...defaults};monthOffset=0;fill();render()};$('previous-month').onclick=()=>{monthOffset--;drawCalendar()};$('next-month').onclick=()=>{monthOffset++;drawCalendar()};fill();render();
+</script></body></html>

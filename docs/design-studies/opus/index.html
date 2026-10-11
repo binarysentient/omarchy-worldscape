@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worldscape · Opus study · Windows on the world</title>
+<style>
+:root{color-scheme:dark;--page:#101114;--pfg:#d9dbe1;--pdim:#868a96;--pline:#262830}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--pfg);font:14px/1.45 system-ui,sans-serif}
+header{padding:28px 32px 8px;max-width:1500px;margin:auto}
+header small{color:var(--pdim);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+header h1{margin:6px 0 4px;font-weight:600;font-size:26px}
+header p{margin:0;color:var(--pdim);max-width:70ch}
+main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;padding:16px 32px 40px;max-width:1500px;margin:auto}
+@media(max-width:1100px){main{grid-template-columns:1fr}}
+@media(max-width:600px){main,header{padding-left:12px;padding-right:12px}}
+.stage{border-radius:18px;padding:22px;min-height:560px;transition:background .6s}
+.side{display:flex;flex-direction:column;gap:14px}
+.box{border:1px solid var(--pline);border-radius:14px;padding:14px;background:#15161b}
+.box h2{margin:0 0 4px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pdim);display:flex;justify-content:space-between}
+.box h2 i{font-style:normal;font-size:10px;border:1px solid var(--pline);border-radius:99px;padding:1px 7px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.chip{border:1px solid transparent;border-radius:10px;padding:8px 4px 6px;cursor:pointer;font:11px system-ui;display:flex;flex-direction:column;align-items:center;gap:5px}
+.chip[aria-pressed=true]{outline:2px solid #fff;outline-offset:1px}
+.chip b{display:flex;gap:3px}.chip b span{width:9px;height:9px;border-radius:50%}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
+.row>span{color:var(--pdim);font-size:12px}
+.seg{display:flex;flex-wrap:wrap;background:#0d0e11;border-radius:9px;padding:2px}
+.seg button{background:none;border:0;color:var(--pdim);font:12px system-ui;padding:5px 9px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed=true]{background:#2a2c35;color:#fff}
+select,input[type=range]{width:100%}
+select{background:#0d0e11;color:var(--pfg);border:1px solid var(--pline);border-radius:8px;padding:6px}
+button.act{background:#2a2c35;color:#fff;border:0;border-radius:8px;padding:6px 10px;cursor:pointer;font:12px system-ui}
+#why{margin:8px 0 0;font-size:12.5px}#why em{color:var(--pdim);font-style:normal;display:block}
+.cust{display:none;gap:8px;margin-top:10px}.cust.on{display:flex}.cust label{font-size:11px;color:var(--pdim);display:flex;flex-direction:column;gap:3px;flex:1}
+.cust input{width:100%;height:28px;border:0;background:none}
+:focus-visible{outline:2px solid #8ab4ff;outline-offset:2px}
+
+/* ---------- the widget ---------- */
+.w{--r:16px;color:var(--fg);font-family:var(--font);max-width:1100px;margin:auto}
+.bar{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:10px;padding:6px 14px;font:13px "JetBrainsMono Nerd Font","JetBrains Mono",ui-monospace,monospace;margin-bottom:10px;border:1px solid var(--line)}
+.bar .ws span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--dim);margin-right:6px}.bar .ws span:first-child{background:var(--ac)}
+.bar .mid{font-weight:600}.bar .wxb{color:var(--dim)}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;box-shadow:0 30px 60px -30px #000a}
+.panel.nocal{grid-template-columns:1fr}
+@media(max-width:760px){.panel{grid-template-columns:1fr}}
+.cal h3{margin:0;font-size:30px;font-weight:var(--hw);line-height:1}
+.cal .dt{color:var(--dim);margin:4px 0 12px}
+.cal .story{background:var(--surf);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:13px}
+.cal .story b{display:block;font-size:15px;font-weight:var(--hw)}
+.cal .story span{color:var(--dim)}
+.mon{display:flex;justify-content:space-between;font-weight:600;font-size:13px;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;gap:2px}
+.grid span{padding:4px 0;border-radius:7px;font-variant-numeric:tabular-nums}
+.grid .dow{color:var(--dim);font-size:10px;text-transform:uppercase}
+.grid .off{opacity:.3}.grid .today{background:var(--ac);color:var(--bg);font-weight:700}
+.cities{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media(max-width:900px){.cities{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.win{height:210px;overflow:hidden;border-radius:var(--wr);border:var(--wb);box-shadow:var(--wsh);transition:transform .4s,height .4s;position:relative}
+.win:hover{transform:translateY(-3px)}
+.win svg{width:100%;height:100%;display:block}
+.compact .win{height:96px}
+.info{padding:10px 2px 0}
+.nm{font-size:12px;color:var(--dim);display:flex;gap:6px;align-items:center;text-transform:var(--case);letter-spacing:var(--track)}
+.nm .home{width:6px;height:6px;border-radius:50%;background:var(--ac)}
+.tm{font-size:var(--ts);font-weight:var(--tw);font-variant-numeric:tabular-nums;line-height:1.05;letter-spacing:-.02em;text-shadow:var(--glow)}
+.compact .tm{font-size:24px}
+.ph{font-size:12px;color:var(--dim)}
+.wxl{margin-top:6px;font-size:13px}.wxl b{color:var(--ac);font-weight:700;margin-right:4px}
+.md{font-size:12px;color:var(--dim);font-style:var(--mdstyle)}
+.compact .md,.compact .hl{display:none}
+.hl{font-size:12px;color:var(--dim)}
+.ribbon{margin-top:16px;position:relative;height:30px}
+.ribbon .band{position:absolute;inset:8px 0 auto;height:8px;border-radius:99px}
+.ribbon i{position:absolute;top:3px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--bg);border:2px solid var(--ac);font:700 9px/14px system-ui;text-align:center;font-style:normal;color:var(--fg)}
+.ribbon .ticks{position:absolute;top:20px;inset-inline:0;display:flex;justify-content:space-between;font-size:10px;color:var(--dim)}
+.foot{display:flex;justify-content:space-between;color:var(--dim);font-size:11px;margin-top:6px}
+
+/* styles: each is a full recipe of type + frame + scene treatment */
+.st-glass{--font:Inter,"SF Pro Display",system-ui,sans-serif;--tw:300;--hw:300;--ts:40px;--wr:999px 999px 18px 18px;--wb:1px solid var(--line);--wsh:inset 0 0 0 1px #ffffff14,0 14px 30px -18px #000;--case:none;--track:0;--glow:none;--mdstyle:normal}
+.st-glass .compact{--wr:48px 48px 14px 14px}
+.st-wood{--font:"Iowan Old Style",Palatino,"Book Antiqua",Georgia,serif;--tw:500;--hw:500;--ts:38px;--wr:6px;--wb:5px solid var(--surf);--wsh:0 0 0 1px var(--line);--case:none;--track:.02em;--glow:none;--mdstyle:italic}
+.st-ink{--font:"Helvetica Neue",Arial,system-ui,sans-serif;--tw:700;--hw:700;--ts:36px;--wr:2px;--wb:1.5px solid var(--fg);--wsh:none;--case:uppercase;--track:.12em;--glow:none;--mdstyle:normal}
+.st-neon{--font:"JetBrainsMono Nerd Font","JetBrains Mono",ui-monospace,monospace;--tw:500;--hw:500;--ts:34px;--wr:4px;--wb:1px solid var(--ac);--wsh:0 0 18px -4px var(--ac);--case:uppercase;--track:.08em;--glow:0 0 14px color-mix(in srgb,var(--ac) 55%,transparent);--mdstyle:normal}
+
+/* life */
+.drift{animation:drift 9s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(-9px)}to{transform:translateX(9px)}}
+.rain{animation:rain .85s linear infinite}
+@keyframes rain{from{transform:translate(0,-60px)}to{transform:translate(-9px,140px)}}
+.snow{animation:snow 7s linear infinite}
+@keyframes snow{from{transform:translate(0,-40px)}50%{transform:translate(5px,60px)}to{transform:translate(-2px,165px)}}
+.tw,.lamp{animation:tw 3.4s ease-in-out infinite}.lamp{animation-duration:7s}
+@keyframes tw{50%{opacity:.25}}
+.pulse{animation:pulse 6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{transform:scale(1.15)}}
+.flash{opacity:0;animation:flash 6s infinite}
+@keyframes flash{0%,86%,92%,100%{opacity:0}88%,94%{opacity:1}}
+.still *{animation:none!important}.still .flash{opacity:.85}.still .skyf{opacity:0}
+@media(prefers-reduced-motion:reduce){.w *{animation:none!important;transition:none!important}.w .flash{opacity:.85}.w .skyf{opacity:0}}
+</style>
+</head>
+<body>
+<header>
+<small>Worldscape · design study by Claude Opus 5.5</small>
+<h1>Windows on the world</h1>
+<p>Every city is a window you look through. The sky, sun, moon and weather live inside the frame; time and forecast sit on the sill, always on solid ground. Auto picks a palette <em>and</em> a window style for your Omarchy theme. Offline prototype; times, weather and theme changes are simulated.</p>
+</header>
+<main>
+<section class="stage" id="stage" aria-label="Widget preview"><div id="w"></div></section>
+<aside class="side">
+<div class="box"><h2>Desktop theme <i>simulated</i></h2>
+<div class="chips" id="chips"></div>
+<div class="cust" id="cust"><label>Background<input type="color" data-c="bg"></label><label>Foreground<input type="color" data-c="fg"></label><label>Accent<input type="color" data-c="accent"></label></div>
+</div>
+<div class="box"><h2>Appearance <i>proposed</i></h2>
+<p id="why"></p>
+<div class="row"><span>Style</span><select id="selStyle" style="width:180px"></select></div>
+<div class="row"><span>Palette</span><select id="selPal" style="width:180px"></select></div>
+<button class="act" id="toAuto">Back to Auto</button>
+</div>
+<div class="box"><h2>Time &amp; weather <i>lab only</i></h2>
+<div class="row"><span>Home time</span><b id="hl"></b></div>
+<input type="range" id="hour" min="0" max="1439" aria-label="Home time of day">
+<div class="row"><button class="act" id="play">▶ Play a day</button></div>
+<div class="row"><span>Weather</span><div class="seg" id="wxseg"></div></div>
+</div>
+<div class="box"><h2>Customize <i>proposed</i></h2><div id="cz"></div>
+<button class="act" id="reset">Reset to defaults</button></div>
+</aside>
+</main>
+<script>
+/* Palettes copied from /usr/share/omarchy/themes/<name>/colors.toml:
+   bg=background surf=lighter_background fg=foreground accent=accent warm=yellow green=green.
+   Exceptions (yellow slot isn't yellow): osaka-jade warm=bright_yellow, matte-black warm=bright_blue (amber).
+   style = chef's pick for that theme. */
+const TH={
+'tokyo-night':['Tokyo Night','dark','#1a1b26','#24283b','#a9b1d6','#7aa2f7','#e0af68','#9ece6a','glass'],
+'catppuccin':['Catppuccin','dark','#1e1e2e','#313244','#cdd6f4','#89b4fa','#f9e2af','#a6e3a1','glass'],
+'catppuccin-latte':['Latte','light','#eff1f5','#dce0e8','#4c4f69','#1e66f5','#df8e1d','#40a02b','glass'],
+'rose-pine':['Rosé Pine','light','#faf4ed','#f2e9e1','#575279','#56949f','#ea9d34','#286983','glass'],
+'gruvbox':['Gruvbox','dark','#282828','#3c3836','#d4be98','#7daea3','#d8a657','#a9b665','wood'],
+'everforest':['Everforest','dark','#2d353b','#343f44','#d3c6aa','#7fbbb3','#dbbc7f','#a7c080','wood'],
+'osaka-jade':['Osaka Jade','dark','#111c18','#23372b','#c1c497','#509475','#e5c736','#549e6a','wood'],
+'kanagawa':['Kanagawa','dark','#1f1f28','#223249','#dcd7ba','#dcd7ba','#c0a36e','#76946a','wood'],
+'nord':['Nord','dark','#2e3440','#3b4252','#d8dee9','#81a1c1','#ebcb8b','#a3be8c','ink'],
+'flexoki-light':['Flexoki Light','light','#fffcf0','#e6e4d9','#100f0f','#205ea6','#d0a215','#879a39','ink'],
+'matte-black':['Matte Black','dark','#121212','#1e1e1e','#bebebe','#e68e0d','#f59e0b','#ffc107','ink'],
+'retro-82':['Retro 82','dark','#05182e','#0a2540','#f6dcac','#faa968','#e97b3c','#028391','neon']};
+const T=k=>{const t=TH[k];return{key:k,name:t[0],mode:t[1],bg:t[2],surf:t[3],fg:t[4],accent:t[5],warm:t[6],green:t[7],style:t[8]}};
+const STYLES={glass:'Glass',wood:'Woodblock',ink:'Ink',neon:'Neon'};
+
+const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t))};
+function lab(h){const[r,g,b]=hx(h).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});
+ const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+ return[.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s]}
+const dist=(a,b)=>{const A=lab(a),B=lab(b);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])};
+
+/* Auto for an unknown/custom theme: find the closest installed theme (OKLab, weighted
+   background > accent > foreground), borrow its chef's-pick style, keep the user's own colours. */
+function relatives(c){return Object.keys(TH).map(k=>{const t=T(k);return[k,.5*dist(c.bg,t.bg)+.3*dist(c.accent,t.accent)+.2*dist(c.fg,t.fg)]}).sort((a,b)=>a[1]-b[1])}
+const sim=d=>Math.max(0,Math.round(100*(1-d/.4)));
+
+const CITIES=[
+{n:'Brampton',home:1,o:0,z:'EDT',wx:'rain',t:14,hi:16,lo:9,land:'M0 180V152l10-9 10 9h4v-14h16v14h6l12-11 12 11h8l7-6 7 6h6v-8h12v8h10V180Z',trees:[[44,152,6],[104,148,5]],lights:[[13,148],[30,143],[56,146],[88,149],[103,146]]},
+{n:'Silicon Valley',o:-3,z:'PDT',wx:'clear',t:19,hi:24,lo:11,land:'M0 180V150Q22 134 46 146T92 140Q108 136 120 142V180Z',palms:[[86,141],[24,143]],lights:[[40,152],[62,150],[104,152]]},
+{n:'London',o:5,z:'BST',wx:'cloud',t:15,hi:17,lo:10,land:'M0 180V154h10v-8h12v8h8v-28h2l4-10 4 10h2v28h8v-12h16v12h8v-6h14v6h10v-16h8v16h14V180Z',lights:[[14,150],[35,132],[56,147],[90,150],[101,142]]},
+{n:'Vadodara',o:9.5,z:'IST',wx:'clear',t:27,hi:33,lo:22,land:'M0 180V154h16v-12h8q10-18 20 0h8v12h12v-8h4v-10l2-4 2 4v10h4v8h44V180Z',palms:[[100,154]],lights:[[20,150],[34,146],[70,150]]}];
+const WXL={clear:'Clear',cloud:'Overcast',rain:'Light rain',snow:'Snow',storm:'Thunderstorm',fog:'Fog'};
+const GL={clear:'☀',cloud:'☁',rain:'☂',snow:'❄',storm:'ϟ',fog:'≋'};
+const DT={clear:2,cloud:0,rain:-2,snow:-15,storm:-3,fog:-3};
+const MOOD={clear:['Clear and bright','A clear, starry night'],cloud:['Soft grey light','Clouds over the city glow'],rain:['Rain on the windows','Rain through the streetlights'],snow:['Snow settling in','Quiet snowfall'],storm:['Thunder rolling in','A storm in the dark'],fog:['Fog softens everything','Fog around the lamps']};
+
+const SR=7,SS=18.6; // October-ish sunrise/sunset; the native widget would use per-city values
+const K=[[0,'#0a1230','#23305a'],[5.6,'#0a1230','#23305a'],[7,'#48508a','#f4a582'],[8.6,'#3f8fd8','#bfe2f5'],[17,'#3f8fd8','#bfe2f5'],[18.6,'#352e66','#f2865a'],[19.9,'#0a1230','#23305a'],[24,'#0a1230','#23305a']];
+function skyAt(h){for(let i=1;i<K.length;i++)if(h<=K[i][0]){const a=K[i-1],b=K[i],t=(h-a[0])/(b[0]-a[0]);return[mix(a[1],b[1],t),mix(a[2],b[2],t)]}return[K[0][1],K[0][2]]}
+function phase(h){return h<SR-1.2||h>SS+1.3?'Night':h<SR?'First light':h<SR+1?'Sunrise':h<12?'Morning':h<SS-1.2?'Afternoon':h<SS?'Golden hour':'Dusk'}
+function tint(c,st,P){return st==='ink'?mix(c,P.bg,.45):st==='neon'?mix(mix(c,'#000000',.35),P.accent,.22):st==='wood'?mix(c,P.warm,.16):mix(c,P.accent,.1)}
+
+function scene(c,i,h,wx,st,P){
+ const night=h<SR-.3||h>SS+.3,wet=wx!=='clear',ink=st==='ink',neon=st==='neon',ln=P.fg;
+ let[t0,b0]=skyAt(h),top=tint(t0,st,P),bot=tint(b0,st,P);
+ if(wet){top=mix(top,night?'#1d212b':'#7f8998',.5);bot=mix(bot,night?'#2b303c':'#b8bfc8',.5)}
+ const id='g'+i,m=mix(top,bot,.5);
+ const stops=st==='wood'?`<stop stop-color="${top}"/><stop offset=".4" stop-color="${top}"/><stop offset=".4" stop-color="${m}"/><stop offset=".68" stop-color="${m}"/><stop offset=".68" stop-color="${bot}"/>`
+  :ink?`<stop stop-color="${mix(top,bot,.35)}"/><stop offset="1" stop-color="${mix(top,bot,.6)}"/>`:`<stop stop-color="${top}"/><stop offset="1" stop-color="${bot}"/>`;
+ let s=`<defs><linearGradient id="${id}" x2="0" y2="1">${stops}</linearGradient></defs><rect width="120" height="180" fill="url(#${id})"/>`;
+ if(ink)for(let y=10;y<140;y+=8)s+=`<path d="M0 ${y}h120" stroke="${ln}" stroke-opacity=".07"/>`;
+ if(night)for(let k=0;k<14;k++)s+=`<circle class="tw" style="animation-delay:-${(k*.37).toFixed(2)}s" cx="${(k*37+i*11)%116+2}" cy="${(k*23)%90+6}" r="${k%4?.5:.9}" fill="${ink?ln:'#fff'}" opacity="${wet?.2:.85}"/>`;
+ const span=Math.min(1,Math.max(0,night?(h>SS?h-SS:h+24-SS)/(24-SS+SR):(h-SR)/(SS-SR)));
+ const x=10+span*100,y=142-Math.sin(Math.PI*span)*112;
+ if(!['rain','storm','fog','snow'].includes(wx)){
+  if(night)s+=`<circle class="pulse" cx="${x}" cy="${y}" r="16" fill="#dfe6ff" opacity="${ink?0:.12}"/><circle cx="${x}" cy="${y}" r="7" fill="${ink?P.bg:'#eef0ff'}" stroke="${ink?ln:'none'}"/><circle cx="${x+3.5}" cy="${y-2.5}" r="6" fill="${ink?mix(top,bot,.35):top}"/>`;
+  else{const low=y>105,sun=neon?P.accent:low?'#ffb067':'#fff0b0';
+   s+=`<circle class="pulse" cx="${x}" cy="${y}" r="${low?26:20}" fill="${sun}" opacity="${ink?0:.3}"/><circle cx="${x}" cy="${y}" r="${neon?13:9}" fill="${ink?'none':sun}" stroke="${ink?ln:'none'}" stroke-width="1.2"/>`;
+   if(ink)for(let k=0;k<8;k++){const a=k*Math.PI/4;s+=`<path d="M${x+Math.cos(a)*12} ${y+Math.sin(a)*12}l${Math.cos(a)*5} ${Math.sin(a)*5}" stroke="${ln}" stroke-width="1.2"/>`}
+   if(neon)for(let k=0;k<4;k++)s+=`<rect x="${x-14}" y="${y+2+k*3}" width="28" height="${.8+k*.4}" fill="${m}"/>`}}
+ const heavy=['rain','storm','snow'].includes(wx);
+ const cc=ink?P.bg:heavy?(night?'#2a303b':'#6d7685'):night?'#59627a':'#f3f5f7';
+ const cl=(cx,cy,sc,d,o)=>`<g class="drift" style="animation-duration:${d}s"><g transform="translate(${cx} ${cy}) scale(${sc})" fill="${cc}" opacity="${o}" stroke="${ink?ln:'none'}" stroke-width="${(1/sc).toFixed(2)}"><ellipse rx="18" ry="7"/><circle cx="-6" cy="-5" r="8"/><circle cx="6" cy="-7" r="10"/></g></g>`;
+ if(wx==='clear'&&!night)s+=cl(28+i*17,42+i*6,.7,9+i,.55);
+ if(wx==='cloud')s+=cl(28,44,1.3,11,.9)+cl(88,70,1,8,.85)+cl(50,98,.8,13,.7);
+ if(wx==='fog')s+=cl(60,40,1.4,14,.6);
+ if(heavy)s+=cl(20,26,1.6,10,.95)+cl(82,30,1.8,12,.95)+cl(54,48,1.4,9,.9);
+ if(wx==='storm')s+=`<rect class="flash skyf" width="120" height="180" fill="#fff" opacity="0" style="mix-blend-mode:overlay"/><path class="flash" d="M70 52l-9 22h7l-5 18 14-25h-8l6-15z" fill="${ink?ln:'#fff3b8'}"/>`;
+ const g1=ink?P.bg:neon?mix(P.bg,'#000000',.3):st==='wood'?mix(P.green,'#120f0b',.55):mix(mix(bot,'#0a0f1c',.62),P.bg,.25);
+ const g0=ink?P.bg:st==='wood'?mix(P.green,bot,.5):mix(g1,bot,.45);
+ const sk=ink||neon?`stroke="${neon?P.accent:ln}" stroke-width="1"`:'';
+ s+=`<path d="M0 180V150Q30 136 60 146T120 142V180Z" fill="${g0}" ${ink?`stroke="${ln}" stroke-opacity=".35"`:''}/>`;
+ (c.trees||[]).forEach(([tx,ty,r])=>s+=`<circle cx="${tx}" cy="${ty-r}" r="${r}" fill="${g1}" ${sk}/>`);
+ s+=`<path d="${c.land}" fill="${g1}" ${sk}/>`;
+ (c.palms||[]).forEach(([px,py])=>s+=`<path d="M${px} ${py}q2-14-1-24M${px-1} ${py-24}q-8-2-12 4M${px-1} ${py-24}q8-3 12 3M${px-1} ${py-24}q-4-6-10-6M${px-1} ${py-24}q5-6 10-5" fill="none" stroke="${ink?ln:neon?P.accent:g1}" stroke-width="1.6" stroke-linecap="round"/>`);
+ if(neon)[158,164,173].forEach(gy=>s+=`<path d="M0 ${gy}h120" stroke="${P.accent}" stroke-opacity=".35"/>`);
+ if(night||(wet&&h>16.5)||h<SR+.5)c.lights.forEach(([lx,ly],k)=>s+=`<rect class="lamp" style="animation-delay:-${k*1.3}s" x="${lx}" y="${ly}" width="2.4" height="2.4" fill="${ink?ln:P.warm}"/>`);
+ if(wx==='rain'||wx==='storm')for(let k=0;k<22;k++)s+=`<path class="rain" style="animation-delay:-${((k*.137)%1).toFixed(2)}s" d="M${(k*29+i*7)%124} ${(k*41)%60}l-3 9" stroke="${ink?ln:night?'#a9c4dd':'#e4edf5'}" opacity=".7"/>`;
+ if(wx==='snow')for(let k=0;k<18;k++)s+=`<circle class="snow" style="animation-delay:-${(k*.41).toFixed(2)}s" cx="${(k*31+i*5)%118}" cy="${(k*17)%40}" r="${k%3?1:1.6}" fill="${ink?ln:'#fff'}" opacity=".9"/>`;
+ if(wx==='fog')for(let k=0;k<4;k++)s+=`<rect class="drift" style="animation-duration:${10+k*3}s" x="-20" y="${92+k*16}" width="160" height="10" rx="5" fill="${ink?ln:night?'#9aa3b3':'#eef0f2'}" opacity="${ink?.12:.38}"/>`;
+ return`<svg viewBox="0 0 120 180" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${s}</svg>`}
+
+/* ---------- state ---------- */
+const DEF={clock:'expanded',cal:'show',calSize:'expanded',week:0,h24:true,unit:'C',barFmt:'full',barWx:true,motion:true,style:'auto',palette:'auto'};
+let prefs={...DEF};try{Object.assign(prefs,JSON.parse(localStorage.getItem('worldscape-opus')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('worldscape-opus',JSON.stringify(prefs))}catch(e){}};
+const L={theme:'tokyo-night',custom:{bg:'#2a2133',fg:'#eadfce',accent:'#e39a62'},min:15*60+42,wx:'live',timer:null};
+
+function resolve(){
+ let src,rel=null;
+ if(L.theme==='custom'){const c=L.custom;rel=relatives(c);const n=T(rel[0][0]);
+  src={key:'custom',name:'Custom',mode:lab(c.bg)[0]<.6?'dark':'light',bg:c.bg,surf:mix(c.bg,c.fg,.08),fg:c.fg,accent:c.accent,warm:n.warm,green:n.green,style:n.style}}
+ else src=T(L.theme);
+ const P=prefs.palette==='auto'?src:T(prefs.palette);
+ const st=prefs.style==='auto'?P.style:prefs.style;
+ let why;
+ if(prefs.palette==='auto'&&prefs.style==='auto')why=rel?`Auto · your colours, <b>${STYLES[st]}</b> style<em>Closest installed relative: ${rel.slice(0,3).map(r=>`${T(r[0]).name} ${sim(r[1])}%`).join(' · ')}</em>`
+  :`Auto · <b>${src.name}</b> palette, <b>${STYLES[st]}</b> style<em>Chef's pick for ${src.name}. Follows your theme when it changes.</em>`;
+ else why=`Combined · <b>${P.name}</b> palette + <b>${STYLES[st]}</b> style<em>${prefs.palette==='auto'?'Palette still follows your desktop theme.':'Palette pinned; it won\'t follow theme changes.'}</em>`;
+ return{P,st,why}}
+
+const pad=n=>String(n).padStart(2,'0');
+function fmt(min){const h=Math.floor(min/60),m=min%60;return prefs.h24?`${pad(h)}:${pad(m)}`:`${h%12||12}:${pad(m)}<small style="font-size:.45em;margin-left:3px">${h<12?'AM':'PM'}</small>`}
+const fmtPlain=min=>fmt(min).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+const deg=c=>prefs.unit==='C'?c:Math.round(c*9/5+32);
+function city(c){const raw=L.min+c.o*60,min=((raw%1440)+1440)%1440,h=min/60,off=Math.floor(raw/1440);
+ const wx=L.wx==='live'?c.wx:L.wx,d=L.wx==='live'?0:DT[wx];
+ return{min,h,day:['Sat 10','Sun 11','Mon 12'][off+1],wx,t:wx==='snow'?Math.min(c.t+d,0):c.t+d,hi:wx==='snow'?Math.min(c.hi+d,2):c.hi+d,lo:c.lo+d}}
+
+function calendar(home,P){
+ const dows=['Su','Mo','Tu','We','Th','Fr','Sa'];const lead=(4-prefs.week+7)%7;let g='';
+ for(let k=0;k<7;k++)g+=`<span class="dow">${dows[(k+prefs.week)%7]}</span>`;
+ for(let k=0;k<Math.ceil((lead+31)/7)*7;k++){const d=k-lead+1,out=d<1||d>31;g+=`<span class="${out?'off':d===11?'today':''}">${d<1?30+d:d>31?d-31:d}</span>`}
+ const night=home.h<SR||home.h>SS,next=night?`Sunrise ${fmtPlain(SR*60)}`:`Sunset ${fmtPlain(Math.round(SS*60))}`;
+ const story=prefs.calSize==='expanded'?`<h3>Sunday</h3><div class="dt">11 October 2026</div><div class="story"><b>${MOOD[home.wx][night?1:0]}</b><span>${GL[home.wx]} ${deg(home.t)}° at home · ${next}</span></div>`:'';
+ return`<aside class="cal">${story}<div class="mon"><span>October 2026</span><span style="color:var(--dim)">‹ ›</span></div><div class="grid">${g}</div></aside>`}
+
+function render(){
+ const{P,st,why}=resolve();const w=document.getElementById('w');
+ const vars={'--bg':P.bg,'--surf':P.surf,'--fg':P.fg,'--dim':mix(P.fg,P.bg,.38),'--ac':P.accent,'--line':mix(P.fg,P.bg,.86)};
+ const data=CITIES.map(city),home=data[0];
+ document.getElementById('stage').style.background=`radial-gradient(120% 90% at 80% 0%,${mix(P.accent,P.bg,.75)},${mix(P.bg,P.mode==='light'?'#b9b6ae':'#000000',.35)})`;
+ const bar=prefs.barFmt==='short'?fmtPlain(home.min):prefs.barFmt==='date'?`Oct 11 ${fmtPlain(home.min)}`:`Sun 11 Oct · ${fmtPlain(home.min)}`;
+ const band=[...Array(25)].map((_,k)=>{const[a,b]=skyAt(k);return`${tint(mix(a,b,.55),st,P)} ${k/24*100}%`}).join(',');
+ w.className=`w st-${st}`+(prefs.motion?'':' still');Object.entries(vars).forEach(([k,v])=>w.style.setProperty(k,v));
+ w.innerHTML=`<div class="bar"><span class="ws"><span></span><span></span><span></span></span><span class="mid">${bar}</span><span class="wxb">${prefs.barWx?`${GL[home.wx]} ${deg(home.t)}°`:''}</span></div>
+ <div class="panel ${prefs.cal==='hide'?'nocal':''}">${prefs.cal==='show'?calendar(home,P):''}
+ <section><div class="cities ${prefs.clock}">${CITIES.map((c,i)=>{const d=data[i];return`<article aria-label="${c.n}, ${fmtPlain(d.min)}, ${WXL[d.wx]} ${deg(d.t)} degrees"><div class="win">${scene(c,i,d.h,d.wx,st,P)}</div>
+ <div class="info"><div class="nm">${c.home?'<span class="home"></span>':''}${c.n}</div><div class="tm">${fmt(d.min)}</div><div class="ph">${phase(d.h)} · ${d.day} · ${c.z}</div>
+ <div class="wxl"><b>${GL[d.wx]} ${deg(d.t)}°</b>${WXL[d.wx]}</div><div class="md">${MOOD[d.wx][d.h<SR||d.h>SS+.5?1:0]}</div><div class="hl">H ${deg(d.hi)}° · L ${deg(d.lo)}°</div></div></article>`}).join('')}</div>
+ <div class="ribbon" aria-label="Where each city is in its day"><div class="band" style="background:linear-gradient(90deg,${band})"></div>${data.map((d,i)=>`<i style="left:${d.h/24*100}%" title="${CITIES[i].n}">${CITIES[i].n[0]}</i>`).join('')}<div class="ticks"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div></div>
+ <div class="foot"><span>Open-Meteo · °${prefs.unit}</span><span>${L.wx==='live'?'Sample city weather':'Preview weather'}</span></div></section></div>`;
+ document.getElementById('why').innerHTML=why;
+ document.getElementById('hl').textContent=fmtPlain(L.min);document.getElementById('hour').value=L.min;
+ document.getElementById('selStyle').value=prefs.style;document.getElementById('selPal').value=prefs.palette;
+ document.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===L.theme));
+ document.getElementById('cust').classList.toggle('on',L.theme==='custom');
+ document.querySelectorAll('#wxseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===L.wx));
+ document.querySelectorAll('#cz .seg button').forEach(b=>b.setAttribute('aria-pressed',SEG.find(s=>s[0]===b.dataset.k)[2][b.dataset.i][0]===prefs[b.dataset.k]))}
+
+/* ---------- controls ---------- */
+const chips=document.getElementById('chips');
+[...Object.keys(TH),'custom'].forEach(k=>{const t=k==='custom'?{name:'Custom…',...L.custom}:T(k);const b=document.createElement('button');b.className='chip';b.dataset.k=k;
+ b.style.cssText=`background:${t.bg};color:${t.fg};border-color:${mix(t.fg,t.bg,.8)}`;b.innerHTML=`<b><span style="background:${t.accent}"></span><span style="background:${t.fg}"></span></b>${t.name}`;
+ b.onclick=()=>{L.theme=k;render()};chips.append(b)});
+document.querySelectorAll('#cust input').forEach(inp=>{inp.value=L.custom[inp.dataset.c];inp.oninput=()=>{L.custom[inp.dataset.c]=inp.value;render()}});
+document.getElementById('selStyle').innerHTML=`<option value="auto">Auto (match theme)</option>`+Object.entries(STYLES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+document.getElementById('selPal').innerHTML=`<option value="auto">Auto (desktop theme)</option>`+Object.keys(TH).map(k=>`<option value="${k}">${T(k).name}</option>`).join('');
+document.getElementById('selStyle').onchange=e=>{prefs.style=e.target.value;save();render()};
+document.getElementById('selPal').onchange=e=>{prefs.palette=e.target.value;save();render()};
+document.getElementById('toAuto').onclick=()=>{prefs.style='auto';prefs.palette='auto';save();render()};
+document.getElementById('hour').oninput=e=>{L.min=+e.target.value;render()};
+document.getElementById('play').onclick=e=>{if(L.timer){clearInterval(L.timer);L.timer=null;e.target.textContent='▶ Play a day';return}
+ e.target.textContent='❚❚ Pause';L.timer=setInterval(()=>{L.min=(L.min+5)%1440;render()},60)};
+document.getElementById('wxseg').innerHTML=['live',...Object.keys(WXL)].map(v=>`<button data-v="${v}" title="${v==='live'?'Each city\'s own weather':WXL[v]}">${v==='live'?'City samples':GL[v]}</button>`).join('');
+document.getElementById('wxseg').onclick=e=>{const v=e.target.closest('button')?.dataset.v;if(v){L.wx=v;render()}};
+const SEG=[['clock','World clocks',[['compact','Compact'],['expanded','Expanded']]],['cal','Calendar',[['show','Show'],['hide','Hide']]],['calSize','Calendar view',[['compact','Compact'],['expanded','Expanded']]],
+ ['week','Week starts',[[0,'Sun'],[1,'Mon']]],['h24','Clock',[[false,'12h'],[true,'24h']]],['unit','Units',[['C','°C'],['F','°F']]],
+ ['barFmt','Bar time',[['full','Sun 11 Oct · 15:42'],['date','Oct 11 15:42'],['short','15:42']]],['barWx','Bar weather',[[true,'Show'],[false,'Hide']]],['motion','Motion',[[true,'Animated'],[false,'Quiet']]]];
+document.getElementById('cz').innerHTML=SEG.map(([k,l,o])=>`<div class="row"><span>${l}</span><div class="seg">${o.map((x,i)=>`<button data-k="${k}" data-i="${i}">${x[1]}</button>`).join('')}</div></div>`).join('');
+document.getElementById('cz').onclick=e=>{const b=e.target.closest('button');if(!b)return;prefs[b.dataset.k]=SEG.find(s=>s[0]===b.dataset.k)[2][b.dataset.i][0];save();render()};
+document.getElementById('reset').onclick=()=>{prefs={...DEF};save();render()};
+const q=new URLSearchParams(location.search);if(TH[q.get('theme')]||q.get('theme')==='custom')L.theme=q.get('theme');if(WXL[q.get('weather')])L.wx=q.get('weather');if(q.has('hour'))L.min=Math.max(0,Math.min(23,+q.get('hour')||0))*60;
+render();
+</script>
+</body>
+</html>

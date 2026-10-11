@@ -24,6 +24,26 @@ first-run experience should need no appearance configuration to look finished.
 We can offer several curated designs, but we still choose and polish a default.
 Installing a clock should not begin with a design assignment.
 
+## Auto is the default
+
+Worldscape should belong to the active Omarchy theme without configuration.
+Use the theme's actual palette and declared light/dark mode. For familiar themes,
+choose a considered illustration treatment that suits their visual character.
+For a new user theme, infer the closest treatment from palette characteristics
+rather than requiring a hardcoded name. This is local, deterministic matching;
+no agent or remote AI is needed at runtime.
+
+Keep theme color and scene meaning separate: a dark interface can show a bright
+sunny afternoon, and a light interface can show a moonlit city. Each scene follows
+its city's time of day and actual weather. The palette makes it feel at home;
+weather and daylight make it feel alive.
+
+Offer a small manual override when Auto does not express someone's taste. A user
+may combine their desktop palette with another illustration treatment; shared
+information preferences should remain intact. Name the resolved treatment clearly
+and keep returning to Auto easy. Describe theme samples as representative unless
+we have evidence of popularity; do not present a popularity ranking as fact.
+
 ## 2. Offer a few useful recipe adjustments
 
 Customize is for common decisions someone can make quickly and confidently.
