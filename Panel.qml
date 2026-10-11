@@ -5,53 +5,155 @@ import qs.Commons
 import qs.Ui
 import "Model.js" as Model
 import "WeatherModel.js" as WeatherModel
-import "StatusColors.js" as Palette
+import "Sky.js" as Sky
+import "ThemeMatch.js" as ThemeMatch
 
+// Windows on the world: the calendar and home mood on the left, a window per
+// city on the right with its time and weather on the sill below, and a day
+// ribbon that places every city on one 24-hour band.
 Panel {
   id: root
-  readonly property bool darkPalette: Color.popups.background.r * 0.299 + Color.popups.background.g * 0.587 + Color.popups.background.b * 0.114 < 0.5
   moduleName: "io.github.binarysentient.worldscape"
   manageIpc: false
   property var anchorItem: null
   property var hostWidget: null
   property date today: new Date()
+  property real nowMs: Date.now()
   property int viewYear: today.getFullYear()
   property int viewMonth: today.getMonth()
   property var worldClocks: []
-  readonly property var localWeather: worldClocks.find(function(row) { return row.local }) || null
-  readonly property var localCondition: localWeather && localWeather.report ? localWeather.report.current : null
-  readonly property string weatherPeek: localCondition
-    ? WeatherModel.iconForOpenMeteoCode(localCondition.weather_code, localCondition.is_day === 0) + " " + Math.round(localCondition.temperature_2m) + "°C"
-    : ""
   property string clockError: ""
-  readonly property string family: fontFamily
+  property bool customizing: false
+
+  // ---- Shared preferences (shell.json entry). Survive style changes.
+  readonly property string styleSetting: ThemeMatch.normalizedStyle(setting("style", "auto"))
+  readonly property bool motion: setting("motion", "animated") !== "quiet"
+  readonly property bool compactClocks: setting("clockLayout", "expanded") === "compact"
+  readonly property bool showCalendar: setting("calendar", "show") !== "hide"
+  readonly property bool compactCalendar: setting("calendarLayout", "expanded") === "compact"
+  readonly property bool h24: String(setting("hours", "24")) !== "12"
   readonly property bool imperial: setting("unit", "metric") === "imperial"
+  readonly property bool barWeather: setting("barWeather", true) !== false && setting("barWeather", true) !== "false"
   readonly property int weekStart: Model.normalizedWeekStart(setting("weekStartDay", null), Qt.locale().firstDayOfWeek)
   readonly property var weekdays: Model.weekdayOrder(weekStart)
   readonly property var weeks: Model.monthGrid(viewYear, viewMonth, weekStart, Model.keyForDate(today))
-  readonly property string fontFamily: Style.font.family
+  readonly property var settingKeys: ["style", "motion", "clockLayout", "calendar", "calendarLayout", "hours", "unit", "weekStartDay", "format", "barWeather"]
+
+  // ---- Appearance. The palette is always the live theme; Auto picks the
+  //      window style from it (ThemeMatch.js). Rebinds on theme switches.
+  readonly property var appearance: ThemeMatch.resolve(Sky.hex(Color.background), Sky.hex(Color.foreground), Sky.hex(Color.accent), styleSetting)
+  readonly property string windowStyle: appearance.style
+  readonly property string autoStyleName: ThemeMatch.resolve(Sky.hex(Color.background), Sky.hex(Color.foreground), Sky.hex(Color.accent), "auto").styleName
+  readonly property string appearanceNote: !appearance.auto
+    ? appearance.styleName + " windows in your desktop palette. Auto would choose " + autoStyleName + "."
+    : appearance.exact
+      ? "Auto: " + appearance.styleName + " windows suit " + appearance.themeName + ". Follows your theme when it changes."
+      : "Auto: your own palette, closest to " + appearance.relative + " (" + appearance.relativeScore + "% similar), so " + appearance.styleName + " windows."
   readonly property color ink: Color.popups.text
+  readonly property color surfaceColor: Color.popups.background
+  readonly property string bgHex: Sky.hex(Color.popups.background)
+  readonly property string inkHex: Sky.hex(Color.popups.text)
+  readonly property color dim: Sky.mix(inkHex, bgHex, 0.36)
+  readonly property color raised: Sky.mix(bgHex, inkHex, 0.07)
+  readonly property var pal: ({ bg: bgHex, fg: inkHex, accent: Sky.hex(Color.accent), warm: appearance.warm, green: appearance.green })
+  readonly property var type: {
+    if (windowStyle === "woodblock") return { family: "serif", weight: Font.Medium, upper: false, track: 0.3, italicMood: true, timeSize: 36 }
+    if (windowStyle === "ink") return { family: "sans-serif", weight: Font.Bold, upper: true, track: 1.4, italicMood: false, timeSize: 34 }
+    if (windowStyle === "neon") return { family: Style.font.family, weight: Font.Medium, upper: true, track: 1, italicMood: false, timeSize: 32 }
+    return { family: "sans-serif", weight: Font.Light, upper: false, track: 0, italicMood: false, timeSize: 38 }
+  }
+
+  // ---- Home city and what the bar peeks at.
+  readonly property var homeRow: worldClocks.find(function(row) { return row && row.local }) || worldClocks[0] || null
+  readonly property var localCondition: homeRow && homeRow.report && homeRow.report.current ? homeRow.report.current : null
+  readonly property bool hasHomeWeather: localCondition !== null && localCondition.temperature_2m !== undefined && localCondition.temperature_2m !== null
+  readonly property string weatherPeek: barWeather && hasHomeWeather
+    ? WeatherModel.iconForOpenMeteoCode(localCondition.weather_code, localCondition.is_day === 0) + " " + temperature(localCondition.temperature_2m)
+    : ""
+  readonly property int homeOffset: homeRow ? Sky.rowOffset(homeRow, nowMs) : -new Date(nowMs).getTimezoneOffset()
+  readonly property var homeSun: homeRow ? Sky.solarDay(homeRow.latitude, homeRow.longitude, nowMs, homeOffset) : Sky.solarDay(null, null, nowMs, homeOffset)
+  readonly property real homeHour: Sky.cityTime(nowMs, homeOffset, true).hour
+  readonly property string homeKind: Sky.weatherKind(hasHomeWeather ? localCondition.weather_code : null)
+  readonly property string moodTitle: homeRow ? Sky.mood(homeKind, Sky.isNight(homeHour, homeSun)) : ""
+  readonly property string moodDetail: {
+    if (!homeRow) return ""
+    var parts = []
+    if (hasHomeWeather) parts.push(WeatherModel.iconForOpenMeteoCode(localCondition.weather_code, localCondition.is_day === 0) + " " + temperature(localCondition.temperature_2m) + " at home")
+    else parts.push("Weather unavailable")
+    if (!homeSun.polar) {
+      var night = homeHour < homeSun.sunrise || homeHour > homeSun.sunset
+      parts.push((night ? "Sunrise " : "Sunset ") + hourLabel(night ? homeSun.sunrise : homeSun.sunset))
+    }
+    return parts.join(" · ")
+  }
+  readonly property var ribbonCities: worldClocks.map(function(row) {
+    return { name: row.city, local: !!row.local, hour: Sky.cityTime(nowMs, Sky.rowOffset(row, nowMs), true).hour }
+  })
+  readonly property string weatherStatus: {
+    if (clockError) return clockError
+    if (weatherProcess.running) return "Updating weather…"
+    var newest = 0, stale = false, missing = false
+    for (var i = 0; i < worldClocks.length; i++) {
+      var r = worldClocks[i]
+      if (r.updated) newest = Math.max(newest, Number(r.updated) || 0)
+      if (r.stale) stale = true
+      if (!r.report) missing = true
+    }
+    if (stale) return "Offline · showing saved forecast"
+    if (missing && newest === 0) return "Weather unavailable · retrying"
+    return newest > 0 ? "Updated " + hourLabel(new Date(newest * 1000).getHours() + new Date(newest * 1000).getMinutes() / 60) : ""
+  }
+
   function temperature(value) {
-    if (value === undefined || value === null) return "—"
-    return Math.round(imperial ? Number(value) * 9 / 5 + 32 : Number(value)) + "°"
+    if (value === undefined || value === null || !isFinite(Number(value))) return "—"
+    return Math.round(imperial ? Number(value) * 9 / 5 + 32 : Number(value)) + "°" + (imperial ? "F" : "C")
   }
-  function condition(code) {
-    if (code === 0) return "Clear"
-    if (code === 1) return "Mostly clear"
-    if (code === 2) return "Partly cloudy"
-    if (code === 3) return "Overcast"
-    if (code === 45 || code === 48) return "Fog"
-    if (code >= 51 && code <= 57) return "Drizzle"
-    if (code >= 61 && code <= 67) return "Rain"
-    if (code >= 71 && code <= 77) return "Snow"
-    if (code >= 80 && code <= 82) return "Rain showers"
-    if (code === 85 || code === 86) return "Snow showers"
-    if (code >= 95) return "Thunderstorms"
-    return "Weather"
+  function hourLabel(h) {
+    var total = Math.round(h * 60), hh = Math.floor(total / 60) % 24, mm = total % 60
+    var m = (mm < 10 ? "0" : "") + mm
+    return h24 ? ((hh < 10 ? "0" : "") + hh + ":" + m) : ((hh % 12 || 12) + ":" + m + (hh < 12 ? " AM" : " PM"))
   }
+
+  // ---- Bar formats offered in Customize; right-click still walks the full ring.
+  readonly property var barPresets: ({ day: ["dddd HH:mm", "dddd h:mm AP"], date: ["ddd d MMM HH:mm", "ddd d MMM h:mm AP"], time: ["HH:mm", "h:mm AP"] })
+  readonly property string barPreset: {
+    var current = String(setting("format", "dddd HH:mm"))
+    for (var key in barPresets) if (barPresets[key].indexOf(current) >= 0) return key
+    return ""
+  }
+  function barFormat(preset) { return (barPresets[preset] || barPresets.day)[h24 ? 0 : 1] }
+
+  // ---- Settings persistence: one merged entry written back to shell.json.
+  function commitSettings(entry) {
+    settings = entry
+    if (hostWidget) hostWidget.settings = entry
+    if (bar && bar.shell && typeof bar.shell.updateEntryInline === "function") bar.shell.updateEntryInline(moduleName, entry)
+  }
+  function saveSettings(patch) {
+    var entry = { id: moduleName }
+    for (var key in settings) if (key !== "id") entry[key] = settings[key]
+    for (var k in patch) entry[k] = patch[k]
+    commitSettings(entry)
+  }
+  function resetSettings() {
+    var entry = { id: moduleName }
+    for (var key in settings) if (key !== "id" && settingKeys.indexOf(key) < 0) entry[key] = settings[key]
+    commitSettings(entry)
+  }
+  function setHourCycle(is24) {
+    var patch = { hours: is24 ? "24" : "12" }
+    if (barPreset !== "") patch.format = barPresets[barPreset][is24 ? 0 : 1]
+    saveSettings(patch)
+  }
+  function toggleWeekStart() {
+    saveSettings({ weekStartDay: Model.weekStartSettingName(Model.toggledWeekStart(weekStart)) })
+  }
+
+  // ---- Data and lifecycle. The clock path never waits on the network.
   function refreshWeather() { if (!weatherProcess.running) weatherProcess.running = true }
   function refresh() {
     today = new Date()
+    nowMs = Date.now()
     if (!worldProcess.running) worldProcess.running = true
   }
   function goToToday() { viewYear = today.getFullYear(); viewMonth = today.getMonth() }
@@ -66,26 +168,37 @@ Panel {
       bar.centerHoverRevealSuppressed = value
   }
   function open() {
+    customizing = false
     refresh(); refreshWeather(); goToToday(); controller.show()
     Qt.callLater(function() { if (root.opened) root.setCenterHoverRevealSuppressed(true) })
   }
+  function openCustomize() { if (!opened) open(); customizing = true }
+  onCustomizingChanged: {
+    viewport.contentY = 0
+    if (customizing) Qt.callLater(customizeView.begin)
+  }
+  // Keep the keyboard cursor's row on screen when the sheet overflows.
+  function ensureVisible(item) {
+    if (!item || viewport.height <= 0) return
+    var margin = Style.space(8)
+    var top = item.mapToItem(body, 0, 0).y
+    var bottom = top + item.height
+    var maxY = Math.max(0, viewport.contentHeight - viewport.height)
+    if (top - margin < viewport.contentY) viewport.contentY = Math.max(0, top - margin)
+    else if (bottom + margin > viewport.contentY + viewport.height)
+      viewport.contentY = Math.min(maxY, bottom + margin - viewport.height)
+  }
   function close() { setCenterHoverRevealSuppressed(false); controller.hide() }
   function toggle() { if (opened) close(); else open() }
-  function toggleWeekStart() {
-    var entry = {id: moduleName}
-    for (var key in settings) entry[key] = settings[key]
-    entry.weekStartDay = Model.weekStartSettingName(Model.toggledWeekStart(weekStart))
-    settings = entry
-    if (hostWidget) hostWidget.settings = entry
-    if (bar && bar.shell) bar.shell.updateEntryInline(moduleName, entry)
-  }
   function switchPanel(direction) { if (bar) return bar.switchPanelFrom(hostWidget || root, direction); return false }
   onOpenedChanged: if (opened) Qt.callLater(function() { keys.forceActiveFocus() })
+
   SystemClock {
     precision: SystemClock.Minutes
     onDateChanged: {
       var wasCurrent = root.viewYear === root.today.getFullYear() && root.viewMonth === root.today.getMonth()
       root.today = date
+      root.nowMs = date.getTime()
       if (wasCurrent) root.goToToday()
       if (root.opened) root.refresh()
     }
@@ -95,8 +208,15 @@ Panel {
     command: ["python3", Qt.resolvedUrl("combined.py").toString().replace("file://", "")]
     stdout: StdioCollector {
       onStreamFinished: {
-        try { root.worldClocks = JSON.parse(text); root.clockError = "" }
-        catch (e) { root.clockError = "Could not read world clocks" }
+        try {
+          var rows = JSON.parse(text)
+          if (!Array.isArray(rows) || rows.length === 0) throw new Error("empty")
+          root.worldClocks = rows.filter(function(row) { return row && typeof row === "object" })
+          root.clockError = ""
+        } catch (e) {
+          // Keep whatever was showing; a bad read must not blank the panel.
+          root.clockError = root.worldClocks.length ? "" : "Could not read world clocks"
+        }
       }
     }
   }
@@ -112,6 +232,7 @@ Panel {
     }
   }
   Timer { interval: 60000; running: true; repeat: true; triggeredOnStart: true; onTriggered: root.refreshWeather() }
+
   KeyboardPanel {
     id: popup
     anchorItem: root.anchorItem
@@ -119,225 +240,203 @@ Panel {
     bar: root.bar
     open: root.opened
     focusTarget: keys
-    contentWidth: fittedContentWidth(Style.space(1070))
-    contentHeight: fittedContentHeight(Style.space(525))
+    contentWidth: fittedContentWidth(Style.space(root.showCalendar ? 1080 : 840))
+    contentHeight: fittedContentHeight(body.implicitHeight)
+
     PanelKeyCatcher {
       id: keys
       anchors.fill: parent
-      onCloseRequested: root.close()
-      onActivateRequested: root.goToToday()
-      onMoveRequested: function(dx,dy) { root.moveMonth(dx || dy) }
-      onTabRequested: function(direction) { root.switchPanel(direction) }
-      onTextKey: function(t) { if (t.toLowerCase() === "t") root.goToToday(); else if(t.toLowerCase() === "w") root.toggleWeekStart() }
+      // While Customize is showing, navigation keys drive its cursor;
+      // otherwise they keep their calendar/panel meaning.
+      onCloseRequested: { if (root.customizing) root.customizing = false; else root.close() }
+      onActivateRequested: { if (root.customizing) customizeView.activate(); else root.goToToday() }
+      onMoveRequested: function(dx, dy) {
+        if (root.customizing) customizeView.move(dx, dy)
+        else root.moveMonth(dx || dy)
+      }
+      onTabRequested: function(direction) {
+        if (root.customizing) customizeView.tab(direction)
+        else root.switchPanel(direction)
+      }
+      onTextKey: function(t) {
+        var k = t.toLowerCase()
+        if (k === "c") root.customizing = !root.customizing
+        else if (root.customizing) return
+        else if (k === "t") root.goToToday()
+        else if (k === "w") root.toggleWeekStart()
+      }
+
       Flickable {
         id: viewport
         anchors.fill: parent
-        contentWidth: layout.width
-        contentHeight: layout.height
+        contentWidth: width
+        contentHeight: body.implicitHeight
         clip: true
-        Row {
-          id: layout
-          width: Math.max(viewport.width, Style.space(1020))
-          height: Style.space(525)
-          spacing: Style.space(22)
+        boundsBehavior: Flickable.StopAtBounds
+
+        Item {
+          id: body
+          width: viewport.width
+          readonly property real gap: Style.space(22)
+          readonly property bool wide: width >= Style.space(780)
+          readonly property bool side: root.showCalendar && wide
+          readonly property real calendarWidth: side ? Style.space(232) : Math.min(width, Style.space(360))
+          implicitHeight: side ? Math.max(calendar.implicitHeight, world.implicitHeight)
+            : (root.showCalendar ? calendar.implicitHeight + gap : 0) + world.implicitHeight
+          height: implicitHeight
+
+          CalendarCard {
+            id: calendar
+            visible: root.showCalendar
+            x: 0; y: 0
+            width: body.calendarWidth
+            today: root.today
+            viewYear: root.viewYear
+            viewMonth: root.viewMonth
+            weeks: root.weeks
+            weekdays: root.weekdays
+            expanded: !root.compactCalendar
+            moodTitle: root.moodTitle
+            moodDetail: root.moodDetail
+            type: root.type
+            ink: root.ink
+            dim: root.dim
+            surface: root.raised
+            todayText: root.surfaceColor
+            onPreviousMonth: root.moveMonth(-1)
+            onNextMonth: root.moveMonth(1)
+            onGoToday: root.goToToday()
+          }
+
+          Rectangle {
+            visible: body.side
+            x: body.calendarWidth + body.gap / 2
+            width: 1; height: body.height
+            color: root.ink; opacity: 0.1
+          }
+
           Column {
-            width: Style.space(310)
-            spacing: Style.space(14)
-            Text {
-              text: Qt.formatDate(root.today, "dddd, d MMMM")
-              color: root.ink
-              font.family: root.fontFamily
-              font.pixelSize: Style.space(18)
-              font.bold: true
-            }
+            id: world
+            x: body.side ? body.calendarWidth + body.gap : 0
+            y: body.side || !root.showCalendar ? 0 : calendar.implicitHeight + body.gap
+            width: body.width - x
+            spacing: Style.space(12)
+
             Item {
-              width: parent.width; height: Style.space(32)
-              PanelActionButton {
-                anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
-                iconText: "󰅁"; tooltipText: "Previous month"
-                foreground: root.ink; onClicked: root.moveMonth(-1)
+              visible: !root.customizing
+              width: parent.width
+              height: Style.space(26)
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.type.upper ? "WORLD" : "World"
+                color: root.ink
+                font.family: root.type.family
+                font.pixelSize: Style.font.heading
+                font.letterSpacing: root.type.track
+                font.bold: true
+              }
+              Row {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Style.space(6)
+                Text {
+                  anchors.verticalCenter: parent.verticalCenter
+                  text: (root.appearance.auto ? "Auto · " : "") + root.appearance.styleName
+                  color: root.dim
+                  font.family: Style.font.family
+                  font.pixelSize: Style.font.caption
+                }
+                PanelActionButton {
+                  anchors.verticalCenter: parent.verticalCenter
+                  iconText: "󰒓"
+                  tooltipText: "Customize (C)"
+                  foreground: root.ink
+                  onClicked: root.customizing = true
+                }
+              }
+            }
+
+            Grid {
+              id: cities
+              visible: !root.customizing
+              width: parent.width
+              columns: width >= Style.space(600) ? Math.max(1, Math.min(4, root.worldClocks.length)) : 2
+              columnSpacing: Style.space(14)
+              rowSpacing: Style.space(16)
+              readonly property real cardWidth: (width - columnSpacing * (columns - 1)) / columns
+
+              Repeater {
+                model: root.worldClocks
+                CityCard {
+                  required property var modelData
+                  width: cities.cardWidth
+                  row: modelData
+                  utcMs: root.nowMs
+                  offsetMinutes: Sky.rowOffset(modelData, root.nowMs)
+                  compact: root.compactClocks
+                  h24: root.h24
+                  imperial: root.imperial
+                  animate: root.motion && root.opened && !root.customizing
+                  style: root.windowStyle
+                  pal: root.pal
+                  type: root.type
+                  ink: root.ink
+                  dim: root.dim
+                }
+              }
+            }
+
+            Text {
+              visible: !root.customizing && root.worldClocks.length === 0
+              text: root.clockError || "Reading clocks…"
+              color: root.dim
+              font.family: Style.font.family
+              font.pixelSize: Style.font.body
+            }
+
+            DayRibbon {
+              visible: !root.customizing && root.worldClocks.length > 0
+              width: parent.width
+              cities: root.ribbonCities
+              sun: root.homeSun
+              style: root.windowStyle
+              pal: root.pal
+              ink: root.ink
+              surface: root.surfaceColor
+            }
+
+            Item {
+              visible: !root.customizing
+              width: parent.width
+              height: footLeft.implicitHeight
+              Text {
+                id: footLeft
+                width: parent.width - footRight.implicitWidth - Style.space(12)
+                elide: Text.ElideRight
+                text: "Open-Meteo · " + (root.imperial ? "°F · mph" : "°C · km/h") + (root.weatherStatus ? " · " + root.weatherStatus : "")
+                color: root.dim
+                font.family: Style.font.family
+                font.pixelSize: Style.font.caption
               }
               Text {
-                anchors.centerIn: parent
-                text: Qt.formatDate(new Date(root.viewYear,root.viewMonth,1), "MMMM yyyy")
-                color: root.ink; font.family: root.fontFamily; font.pixelSize: Style.font.body; font.bold: true
-              }
-              PanelActionButton {
-                anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                iconText: "󰅂"; tooltipText: "Next month"
-                foreground: root.ink; onClicked: root.moveMonth(1)
+                id: footRight
+                anchors.right: parent.right
+                text: "C customize · Esc close"
+                color: root.dim
+                font.family: Style.font.family
+                font.pixelSize: Style.font.caption
               }
             }
-            Column {
-              id: grid
-              width: parent.width
-              spacing: Style.space(4)
-              Row {
-                width: parent.width
-                Repeater {
-                  model: root.weekdays
-                  Text {
-                    required property var modelData
-                    width: grid.width/7; height: Style.space(23)
-                    text: ["Su","Mo","Tu","We","Th","Fr","Sa"][modelData]
-                    horizontalAlignment: Text.AlignHCenter
-                    color: root.ink; opacity: 0.65
-                    font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall
-                  }
-                }
-              }
-              Repeater {
-                model: root.weeks
-                Row {
-                  required property var modelData
-                  Repeater {
-                    model: modelData.days
-                    Rectangle {
-                      required property var modelData
-                      width: grid.width/7; height: Style.space(31)
-                      color: modelData.today ? Style.selectedFillFor(root.ink,Color.accent) : "transparent"
-                      radius: Style.space(4)
-                      border.width: modelData.today ? 1 : 0
-                      border.color: Color.accent
-                      Text {
-                        anchors.centerIn: parent
-                        text: parent.modelData.day
-                        color: root.ink
-                        opacity: parent.modelData.inMonth ? 1 : 0.35
-                        font.family: root.fontFamily; font.pixelSize: Style.font.body
-                        font.bold: parent.modelData.today
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            Text {
-              text: "Today · T / Enter     Month · ← →"
-              color: root.ink; opacity: 0.6
-              font.family: root.fontFamily; font.pixelSize: Style.space(11)
-              MouseArea { anchors.fill: parent; onClicked: root.goToToday() }
-            }
-          }
-          Rectangle { width: Style.space(1); height: parent.height; color: root.ink; opacity: 0.12 }
-          Column {
-            width: parent.width - Style.space(355)
-            spacing: Style.space(8)
-            Item {
-              width: parent.width; height: Style.space(24)
-              Text { text: "World time"; color: root.ink; font.family: root.family; font.pixelSize: Style.space(18); font.bold: true }
-              Text { x: Style.space(312); text: "Weather"; color: root.ink; font.family: root.family; font.pixelSize: Style.space(18); font.bold: true }
-            }
-            Repeater {
-              model: root.worldClocks
-              Rectangle {
-                id: card
-                required property var modelData
-                required property int index
-                readonly property var report: modelData.report
-                readonly property var current: report ? report.current : null
-                width: parent.width; height: Style.space(112)
-                color: modelData.local ? Style.selectedFillFor(root.ink,Color.accent) : "transparent"
-                radius: Style.space(5)
-                border.width: modelData.local ? 1 : 0
-                border.color: Color.accent
-                Column {
-                  anchors.left: parent.left; anchors.top: parent.top; anchors.margins: Style.space(9)
-                  width: Style.space(280)
-                  spacing: Style.space(5)
-                  Row {
-                    width: parent.width
-                    spacing: Style.space(7)
-                    Text {
-                      width: parent.width - clockTime.implicitWidth - periodIcon.implicitWidth - parent.spacing * 2
-                      text: modelData.city + ", " + (modelData.country === "United States" ? "USA" : modelData.country === "United Kingdom" ? "UK" : modelData.country)
-                      elide: Text.ElideRight
-                      anchors.verticalCenter: parent.verticalCenter
-                      color: modelData.local ? Color.accent : root.ink
-                      font.family: root.fontFamily; font.pixelSize: Style.font.body; font.bold: true
-                    }
-                    Text {
-                      id: periodIcon
-                      text: modelData.periodIcon || ""
-                      color: Palette.timeColor(modelData.time, root.darkPalette)
-                      font.family: root.fontFamily
-                      font.pixelSize: Style.space(22)
-                      anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Text {
-                      id: clockTime
-                      text: modelData.time
-                      color: Palette.timeColor(modelData.time, root.darkPalette)
-                      font.family: root.fontFamily; font.pixelSize: Style.space(22); font.bold: true
-                    }
-                  }
-                  Text {
-                    text: (modelData.local ? "Local · " : "") + modelData.abbreviation + " · " + modelData.date + (modelData.local ? "" : " · " + modelData.difference)
-                    width: parent.width; elide: Text.ElideRight
-                    color: root.ink; opacity: 0.65
-                    font.family: root.fontFamily; font.pixelSize: Style.space(11)
-                  }
-                }
-                Column {
-                  x: Style.space(312); y: Style.space(8)
-                  width: parent.width - x - Style.space(8)
-                  spacing: Style.space(5)
-                  Row {
-                    spacing: Style.space(12)
-                    Text {
-                      text: card.current ? WeatherModel.iconForOpenMeteoCode(card.current.weather_code, card.current.is_day === 0) : "—"
-                      color: Palette.weatherColor(card.current ? card.current.weather_code : null, card.current && card.current.is_day === 0, root.darkPalette); font.family: root.family; font.pixelSize: Style.space(24)
-                      anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Text {
-                      text: root.temperature(card.current ? card.current.temperature_2m : null)
-                      color: Palette.temperatureColor(card.current ? card.current.temperature_2m : null, root.darkPalette); font.family: root.family; font.pixelSize: Style.space(22); font.bold: true
-                      anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Text {
-                      text: card.current ? root.condition(card.current.weather_code) : "Unavailable"
-                      color: root.ink; font.family: root.family; font.pixelSize: Style.font.bodySmall
-                      anchors.verticalCenter: parent.verticalCenter
-                    }
-                  }
-                  Text {
-                    width: parent.width; elide: Text.ElideRight
-                    text: card.modelData.stale ? "Offline · cached forecast" : card.current ? "Feels " + root.temperature(card.current.apparent_temperature) + " · Wind " + Math.round(card.current.wind_speed_10m * (root.imperial ? 0.621371 : 1)) + " · Humidity " + card.current.relative_humidity_2m + "%" : card.modelData.error
-                    color: root.ink; opacity: 0.7; font.family: root.family; font.pixelSize: Style.space(11)
-                  }
-                  Rectangle { width: parent.width; height: 1; color: root.ink; opacity: 0.12 }
-                  Row {
-                    width: parent.width
-                    Repeater {
-                      model: card.report ? WeatherModel.openMeteoForecastDays(card.report, card.report.current.time.slice(0,10)) : []
-                      Column {
-                        required property var modelData
-                        width: parent.width / 3
-                        spacing: Style.space(4)
-                        Text {
-                          text: WeatherModel.dayName(modelData.date).slice(0,3)
-                          color: root.ink; opacity: 0.65; font.family: root.family; font.pixelSize: Style.font.bodySmall
-                        }
-                        Text {
-                          text: WeatherModel.dayIcon(modelData) + " " + WeatherModel.bareTempForDay(modelData,"max",root.imperial) + " / " + WeatherModel.bareTempForDay(modelData,"min",root.imperial)
-                          color: root.ink; font.family: root.family; font.pixelSize: Style.space(11)
-                        }
-                      }
-                    }
-                  }
 
-                }
-                Rectangle {
-                  visible: card.index < root.worldClocks.length - 1
-                  anchors.left: parent.left; anchors.right: parent.right
-                  y: parent.height + Style.space(4)
-                  height: 1; color: root.ink; opacity: 0.18
-                }
-              }
-            }
-            Text {
-              text: root.clockError || ("Open-Meteo · " + (root.imperial ? "°F · mph" : "°C · km/h") + " · Weather every 15 min" + (weatherProcess.running ? " · Updating…" : ""))
-              color: root.ink; opacity: 0.65; font.family: root.family; font.pixelSize: Style.space(11)
+            CustomizeView {
+              id: customizeView
+              visible: root.customizing
+              onCursorMoved: function(item) { Qt.callLater(root.ensureVisible, item) }
+              width: parent.width
+              panel: root
+              ink: root.ink
+              dim: root.dim
+              onDone: root.customizing = false
             }
           }
         }

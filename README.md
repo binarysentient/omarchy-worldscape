@@ -3,10 +3,29 @@
 A calendar, world-clock and weather plugin for the Omarchy shell. Four cities,
 one panel, with light and dark palettes inherited from your desktop theme.
 
-**Development preview — not a stable release.** The native widget currently
-provides the original calendar and weather layout. Illustrated designs and the
-Customize interface are interactive HTML prototypes, pending their QML implementation.
-The repository has not been submitted to the Omarchy plugin marketplace.
+**Development preview — not a stable release.** The native widget implements a
+first iteration of the *Windows on the world* design: each city is an illustrated
+window whose sky follows that city's real time of day and current weather, with
+time and forecast on the "sill" below. The repository has not been submitted to
+the Omarchy plugin marketplace. See [docs/NATIVE-ITERATION.md](docs/NATIVE-ITERATION.md)
+for how it is built and what is not done yet.
+
+## Native previews
+
+Captured from the running Omarchy widget in Auto mode. Weather and clocks are
+live; each city keeps its own daylight regardless of the interface palette.
+
+**Tokyo Night · Glass**
+
+![Worldscape in Tokyo Night with arched Glass city windows](docs/screenshots/tokyo-night.png)
+
+**Flexoki Light · Ink**
+
+![Worldscape in Flexoki Light with illustrated Ink city windows](docs/screenshots/flexoki-light.png)
+
+**Retro 82 · Neon**
+
+![Worldscape in Retro 82 with glowing Neon city windows](docs/screenshots/retro-82.png)
 
 ## Opinionated by default. Malleable by design.
 
@@ -25,9 +44,73 @@ Change the artwork, layout, interactions, data sources, or the whole composition
 The menu is a convenience, not the boundary of what Worldscape can become—in the
 spirit of Omarchy and a Linux desktop you can make your own.
 
-These are product principles and intended behavior; the native customization
-menu is still in development. See [the design principles](docs/PRINCIPLES.md)
-for the decisions that guide implementation.
+See [the design principles](docs/PRINCIPLES.md) for the decisions that guide
+implementation.
+
+## What the panel shows
+
+- **City windows.** Four windows (from `locations.json`) with recognisable
+  silhouettes: the CN Tower for Toronto, hills and palms for Silicon Valley,
+  Elizabeth Tower and St Paul's for London, a palace dome and minaret for
+  Vadodara. Any other city gets neighbourhood rooftops. The sky moves
+  continuously through night, first light, sunrise, day, golden hour and dusk
+  using sunrise/sunset calculated locally from each city's coordinates. The sun
+  or moon follows its arc, lamps come on at dusk, and the Open-Meteo condition
+  adds cloud, rain, snow, fog or lightning.
+- **On the sill.** City, local time, phase · day · timezone · offset from you,
+  current condition and temperature, a one-line mood, and today's high/low.
+- **Calendar.** Weekday headline, a home mood card (condition, temperature,
+  next sunrise or sunset) and a navigable month grid.
+- **Day ribbon.** Every city placed on one 24-hour band coloured by the home sky.
+- **Honest weather states.** With no forecast the window shows a muted sky
+  with a faint sun/moon (time is known, conditions are not) and says
+  "No forecast". Offline, the last saved forecast is used and labelled.
+
+The interface colours follow your Omarchy theme's light or dark palette; the
+scene's daylight is independent, so a light desktop can show a moonlit city.
+
+### Window styles and Auto
+
+Four styles change the frame, the scene treatment and the typography:
+**Glass** (arched window, smooth sky), **Woodblock** (matted print, banded sky,
+serif), **Ink** (ruled frame, line drawing, small caps) and **Neon** (glowing
+edge, striped sun, horizon grid, monospace).
+
+**Auto** is the default. It reads the live theme palette (and reacts when you
+switch themes). For installed Omarchy themes it uses a curated pick, for
+example Glass for Tokyo Night, Woodblock for Gruvbox, Ink for Nord and Neon for
+Retro 82. For any other palette it borrows the pick of the nearest installed
+theme by OKLab distance and says which one it chose. Picks are aesthetic
+choices, not a popularity ranking.
+
+### Customize
+
+Click the gear (or press **C**) in the panel. Choices are saved in this widget's
+`shell.json` entry and are shared by every style:
+
+| Choice | Options |
+| --- | --- |
+| Window style | Auto, Glass, Woodblock, Ink, Neon |
+| Motion | Animated, Quiet |
+| World clocks | Expanded, Compact |
+| Time | 12-hour, 24-hour |
+| Temperature | °C · km/h, °F · mph |
+| Calendar | Expanded, Compact, Hidden |
+| Week starts | Sunday, Monday |
+| Bar time | day + time, date + time, time only |
+| Bar weather | Show, Hide |
+
+**Reset to defaults** removes only these keys. Animation only runs while the
+panel is open, and Quiet keeps a still frame (rain streaks and a lightning bolt
+remain visible).
+
+Keys in the panel: **T**/Enter today, **← →** month, **W** week start, **C**
+Customize, **Esc** close. Inside Customize: **↑ ↓** row, **← →** option,
+**Enter**/Space apply, **Tab**/Shift+Tab next/previous row (including Reset and
+Done), **Esc** or **C** back. The widget's IPC target
+`io.github.binarysentient.worldscape` exposes `open`, `close`, `toggle`,
+`refresh`, `cycleFormat`, `toggleWeekStart` and `customize`, e.g.
+`omarchy-shell io.github.binarysentient.worldscape customize`.
 
 ## Install the development version
 
@@ -61,8 +144,11 @@ The data and date in this prototype are illustrative, not live forecasts.
 [Open the comparison page](docs/design-studies/index.html) locally to explore
 independent concepts by Claude Opus 5.5 and GPT-6.1 Sol, both at medium effort.
 Each proposes Auto matching for representative Omarchy palettes and custom themes,
-with weather/daytime artwork and a small set of quick adjustments. These remain
-prototypes; the native plugin does not implement theme matching or these scenes yet.
+with weather/daytime artwork and a small set of quick adjustments. The Opus study
+(*Windows on the world*) is the direction the native widget now implements; the
+studies themselves remain prototypes with simulated data and lab-only controls
+(theme simulator, time scrubber, weather override, palette pinning) that the
+native widget does not ship.
 
 ## Locations and privacy
 
@@ -87,6 +173,9 @@ configuration interface is planned. No detected location cache is included here.
 
 The root `manifest.json` describes the single installable plugin. QML and JS files
 implement its bar button and popup; Python helpers provide time and weather data.
+Start with `Panel.qml` for layout, `CityWindow.qml` for the artwork, `Skylines.js`
+for city silhouettes, `Sky.js` for daylight/weather mapping and `ThemeMatch.js`
+for Auto picks.
 
 ```bash
 omarchy plugin validate .
@@ -94,8 +183,8 @@ python3 -m py_compile combined.py weather.py world_clocks.py
 python3 combined.py  # cached/offline clock read; no network request
 ```
 
-See [the roadmap](docs/ROADMAP.md) for the next steps. The original live widget
-is kept separate while this repository is developed.
+See [the roadmap](docs/ROADMAP.md) for the next steps. Local development copies can be tested separately from the published version.
+Back up the current plugin and shell.json before replacing a personal clock.
 
 ## Credits and license
 
@@ -107,4 +196,7 @@ Weather data by [Open-Meteo](https://open-meteo.com/), under
 [CC BY 4.0](https://open-meteo.com/en/licence); API usage is subject to its
 [terms](https://open-meteo.com/en/terms). Optional IP-based city lookup uses
 [wttr.in](https://github.com/chubin/wttr.in). Fonts come from the host system;
-the design lab uses code-drawn artwork and bundles no external graphics or fonts.
+the native windows and the design lab use code-drawn artwork and bundle no
+external graphics or fonts. The native *Windows on the world* scenes are original
+work by Claude Opus 5.5 for this project; theme colour values in `ThemeMatch.js`
+belong to their respective Omarchy theme authors.
