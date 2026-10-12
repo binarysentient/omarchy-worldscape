@@ -19,7 +19,7 @@ Column {
 
   property int cursorRow: 1
   property int cursorCol: 0
-  readonly property var rows: [actions, styleRow, motionRow, clocksRow, timeRow, unitRow, calendarRow, weekRow, barTimeRow, barWeatherRow]
+  readonly property var rows: [actions, styleRow, motionRow, clocksRow, weatherRow, timeRow, unitRow, calendarRow, weekRow, barTimeRow, barWeatherRow]
 
   signal done()
   // The item under the cursor, so the panel can scroll it into view.
@@ -133,9 +133,19 @@ Column {
     onPicked: function(v) { root.panel.saveSettings({ clockLayout: v }) }
   }
   Choice {
-    id: timeRow
+    id: weatherRow
     width: parent.width
     keyboard: root; rowIndex: 4
+    label: "Weather"
+    ink: root.ink; accent: root.accent
+    current: root.panel.weatherExpanded ? "expanded" : "compact"
+    options: [{ value: "compact", text: "Compact · now only" }, { value: "expanded", text: "Expanded · next + days" }]
+    onPicked: function(v) { root.panel.saveSettings({ weatherLayout: v }) }
+  }
+  Choice {
+    id: timeRow
+    width: parent.width
+    keyboard: root; rowIndex: 5
     label: "Time"
     ink: root.ink; accent: root.accent
     current: root.panel.h24 ? "24" : "12"
@@ -145,7 +155,7 @@ Column {
   Choice {
     id: unitRow
     width: parent.width
-    keyboard: root; rowIndex: 5
+    keyboard: root; rowIndex: 6
     label: "Temperature"
     ink: root.ink; accent: root.accent
     current: root.panel.imperial ? "imperial" : "metric"
@@ -155,7 +165,7 @@ Column {
   Choice {
     id: calendarRow
     width: parent.width
-    keyboard: root; rowIndex: 6
+    keyboard: root; rowIndex: 7
     label: "Calendar"
     ink: root.ink; accent: root.accent
     current: !root.panel.showCalendar ? "hide" : root.panel.compactCalendar ? "compact" : "expanded"
@@ -167,7 +177,7 @@ Column {
   Choice {
     id: weekRow
     width: parent.width
-    keyboard: root; rowIndex: 7
+    keyboard: root; rowIndex: 8
     label: "Week starts"
     ink: root.ink; accent: root.accent
     current: root.panel.weekStart
@@ -177,7 +187,7 @@ Column {
   Choice {
     id: barTimeRow
     width: parent.width
-    keyboard: root; rowIndex: 8
+    keyboard: root; rowIndex: 9
     label: "Bar time"
     ink: root.ink; accent: root.accent
     current: root.panel.barPreset
@@ -191,7 +201,7 @@ Column {
   Choice {
     id: barWeatherRow
     width: parent.width
-    keyboard: root; rowIndex: 9
+    keyboard: root; rowIndex: 10
     label: "Bar weather"
     ink: root.ink; accent: root.accent
     current: root.panel.barWeather ? "show" : "hide"

@@ -6,11 +6,13 @@ import qs.Ui
 import "Model.js" as Model
 import "WeatherModel.js" as WeatherModel
 import "Sky.js" as Sky
+import "Forecast.js" as Forecast
 import "ThemeMatch.js" as ThemeMatch
 
 // Windows on the world: the calendar and home mood on the left, a window per
 // city on the right with its time and weather on the sill below, and a day
-// ribbon that places every city on one 24-hour band.
+// ribbon that places every city on one 24-hour band. Clicking a window (or
+// pressing 1–4) opens that city's focus view with hourly and weekly detail.
 Panel {
   id: root
   moduleName: "io.github.binarysentient.worldscape"
@@ -24,11 +26,15 @@ Panel {
   property var worldClocks: []
   property string clockError: ""
   property bool customizing: false
+  property int focusIndex: -1          // city in the focus view, -1 for all
+  property string weekView: "range"    // focus view: range | panes
+  property string selectedDayKey: ""   // calendar day shown in the home card
 
   // ---- Shared preferences (shell.json entry). Survive style changes.
   readonly property string styleSetting: ThemeMatch.normalizedStyle(setting("style", "auto"))
   readonly property bool motion: setting("motion", "animated") !== "quiet"
   readonly property bool compactClocks: setting("clockLayout", "expanded") === "compact"
+  readonly property bool weatherExpanded: setting("weatherLayout", "expanded") !== "compact"
   readonly property bool showCalendar: setting("calendar", "show") !== "hide"
   readonly property bool compactCalendar: setting("calendarLayout", "expanded") === "compact"
   readonly property bool h24: String(setting("hours", "24")) !== "12"
@@ -37,7 +43,7 @@ Panel {
   readonly property int weekStart: Model.normalizedWeekStart(setting("weekStartDay", null), Qt.locale().firstDayOfWeek)
   readonly property var weekdays: Model.weekdayOrder(weekStart)
   readonly property var weeks: Model.monthGrid(viewYear, viewMonth, weekStart, Model.keyForDate(today))
-  readonly property var settingKeys: ["style", "motion", "clockLayout", "calendar", "calendarLayout", "hours", "unit", "weekStartDay", "format", "barWeather"]
+  readonly property var settingKeys: ["style", "motion", "clockLayout", "weatherLayout", "calendar", "calendarLayout", "hours", "unit", "weekStartDay", "format", "barWeather"]
 
   // ---- Appearance. The palette is always the live theme; Auto picks the
   //      window style from it (ThemeMatch.js). Rebinds on theme switches.
@@ -56,12 +62,11 @@ Panel {
   readonly property color dim: Sky.mix(inkHex, bgHex, 0.36)
   readonly property color raised: Sky.mix(bgHex, inkHex, 0.07)
   readonly property var pal: ({ bg: bgHex, fg: inkHex, accent: Sky.hex(Color.accent), warm: appearance.warm, green: appearance.green })
-  readonly property var type: {
-    if (windowStyle === "woodblock") return { family: "serif", weight: Font.Medium, upper: false, track: 0.3, italicMood: true, timeSize: 36 }
-    if (windowStyle === "ink") return { family: "sans-serif", weight: Font.Bold, upper: true, track: 1.4, italicMood: false, timeSize: 34 }
-    if (windowStyle === "neon") return { family: Style.font.family, weight: Font.Medium, upper: true, track: 1, italicMood: false, timeSize: 32 }
-    return { family: "sans-serif", weight: Font.Light, upper: false, track: 0, italicMood: false, timeSize: 38 }
-  }
+  readonly property color line: Sky.mix(bgHex, inkHex, 0.14)
+  readonly property color warm: appearance.warm
+  // One type system for every window style: the desktop sans for names, time
+  // and prose, the shell's mono for data and captions. Styles change the art.
+  readonly property string sans: "sans-serif"
 
   // ---- Home city and what the bar peeks at.
   readonly property var homeRow: worldClocks.find(function(row) { return row && row.local }) || worldClocks[0] || null
@@ -74,20 +79,67 @@ Panel {
   readonly property var homeSun: homeRow ? Sky.solarDay(homeRow.latitude, homeRow.longitude, nowMs, homeOffset) : Sky.solarDay(null, null, nowMs, homeOffset)
   readonly property real homeHour: Sky.cityTime(nowMs, homeOffset, true).hour
   readonly property string homeKind: Sky.weatherKind(hasHomeWeather ? localCondition.weather_code : null)
-  readonly property string moodTitle: homeRow ? Sky.mood(homeKind, Sky.isNight(homeHour, homeSun)) : ""
+  // ---- Home forecast: calendar glyphs and the home card.
+  readonly property var homeReport: homeRow && homeRow.report ? homeRow.report : null
+  readonly property var homeDays: Forecast.days(homeReport, Forecast.localKeys(nowMs, homeOffset).date, 7)
+  readonly property var homeNext: hasHomeWeather ? Forecast.nextChange(homeReport, nowMs, homeOffset) : null
+  readonly property var calendarForecast: {
+    var map = {}
+    for (var i = 0; i < homeDays.length; i++) {
+      var d = homeDays[i]
+      map[d.key] = { glyph: WeatherModel.iconForOpenMeteoCode(d.code, false), wet: d.chance !== null && d.chance >= 30 }
+    }
+    return map
+  }
+  function homeDay(offset) {
+    for (var i = 0; i < homeDays.length; i++) if (homeDays[i].offset === offset) return homeDays[i]
+    return null
+  }
+  readonly property var pickedDay: {
+    if (!selectedDayKey) return null
+    for (var i = 0; i < homeDays.length; i++)
+      if (homeDays[i].key === selectedDayKey && homeDays[i].offset > 0) return homeDays[i]
+    return null
+  }
+  readonly property string moodTitle: {
+    if (!homeRow) return ""
+    if (pickedDay) return Forecast.fullDayName(pickedDay.key) + " · " + Sky.conditionName(pickedDay.code)
+    return hasHomeWeather ? Sky.conditionName(localCondition.weather_code) + ", " + temperature(localCondition.temperature_2m) : "Weather unavailable"
+  }
+  readonly property string moodNext: {
+    if (pickedDay) return pickedDay.chance !== null && pickedDay.chance >= 30 ? pickedDay.chance + "% chance of rain" : ""
+    if (!weatherExpanded || !homeNext) return ""
+    var n = homeNext, at = hourOnly(n.hour)
+    var text = n.kind === "wet" ? n.label + " from ~" + at
+      : n.kind === "dry" ? "Clearing by ~" + at
+      : n.kind === "heat" ? "Up to " + temperature(n.temp) + " by " + at
+      : "Frost by ~" + at
+    return text + (n.chance ? " · " + n.chance + "%" : "")
+  }
   readonly property string moodDetail: {
     if (!homeRow) return ""
     var parts = []
-    if (hasHomeWeather) parts.push(WeatherModel.iconForOpenMeteoCode(localCondition.weather_code, localCondition.is_day === 0) + " " + temperature(localCondition.temperature_2m) + " at home")
-    else parts.push("Weather unavailable")
+    if (pickedDay) {
+      parts.push(degrees(pickedDay.hi) + " / " + degrees(pickedDay.lo))
+      if (pickedDay.sunrise) parts.push("Sunrise " + clockLabel(pickedDay.sunrise))
+      if (pickedDay.sunset) parts.push("Sunset " + clockLabel(pickedDay.sunset))
+      return parts.join(" · ")
+    }
     if (!homeSun.polar) {
       var night = homeHour < homeSun.sunrise || homeHour > homeSun.sunset
-      parts.push((night ? "Sunrise " : "Sunset ") + hourLabel(night ? homeSun.sunrise : homeSun.sunset))
+      var todaySun = homeDay(0)
+      var tomorrow = homeDay(1)
+      var exact = night ? (homeHour > homeSun.sunset ? tomorrow : todaySun) : todaySun
+      var exactTime = exact ? (night ? exact.sunrise : exact.sunset) : ""
+      parts.push((night ? "Sunrise " : "Sunset ") + (exactTime ? clockLabel(exactTime) : hourLabel(night ? homeSun.sunrise : homeSun.sunset)))
     }
-    return parts.join(" · ")
+    var next = homeDay(1)
+    if (next) parts.push("Tomorrow " + degrees(next.hi) + " / " + degrees(next.lo))
+    return parts.join("\n")
   }
   readonly property var ribbonCities: worldClocks.map(function(row) {
-    return { name: row.city, local: !!row.local, hour: Sky.cityTime(nowMs, Sky.rowOffset(row, nowMs), true).hour }
+    var c = Sky.cityTime(nowMs, Sky.rowOffset(row, nowMs), h24)
+    return { name: row.city, local: !!row.local, hour: c.hour, time: c.text + (c.suffix ? " " + c.suffix : "") }
   })
   readonly property string weatherStatus: {
     if (clockError) return clockError
@@ -108,6 +160,20 @@ Panel {
     if (value === undefined || value === null || !isFinite(Number(value))) return "—"
     return Math.round(imperial ? Number(value) * 9 / 5 + 32 : Number(value)) + "°" + (imperial ? "F" : "C")
   }
+  function degrees(value) {
+    if (value === undefined || value === null || !isFinite(Number(value))) return "—"
+    return Math.round(imperial ? Number(value) * 9 / 5 + 32 : Number(value)) + "°"
+  }
+  function hourOnly(h) { return h24 ? (h < 10 ? "0" : "") + h + ":00" : (h % 12 || 12) + (h < 12 ? " AM" : " PM") }
+  // "HH:MM" from Open-Meteo, shown in the user's hour cycle.
+  function clockLabel(hhmm) {
+    var p = String(hhmm).split(":")
+    return hourLabel(Number(p[0]) + Number(p[1]) / 60)
+  }
+  function focusCity(index) {
+    if (index >= 0 && index < worldClocks.length) { customizing = false; focusIndex = index; viewport.contentY = 0 }
+  }
+  function pickDay(key) { selectedDayKey = selectedDayKey === key ? "" : key }
   function hourLabel(h) {
     var total = Math.round(h * 60), hh = Math.floor(total / 60) % 24, mm = total % 60
     var m = (mm < 10 ? "0" : "") + mm
@@ -156,7 +222,7 @@ Panel {
     nowMs = Date.now()
     if (!worldProcess.running) worldProcess.running = true
   }
-  function goToToday() { viewYear = today.getFullYear(); viewMonth = today.getMonth() }
+  function goToToday() { viewYear = today.getFullYear(); viewMonth = today.getMonth(); selectedDayKey = "" }
   function moveMonth(delta) {
     var d = Model.stepMonth(viewYear, viewMonth, delta)
     viewYear = d.year; viewMonth = d.month
@@ -169,6 +235,7 @@ Panel {
   }
   function open() {
     customizing = false
+    focusIndex = -1
     refresh(); refreshWeather(); goToToday(); controller.show()
     Qt.callLater(function() { if (root.opened) root.setCenterHoverRevealSuppressed(true) })
   }
@@ -199,7 +266,8 @@ Panel {
       var wasCurrent = root.viewYear === root.today.getFullYear() && root.viewMonth === root.today.getMonth()
       root.today = date
       root.nowMs = date.getTime()
-      if (wasCurrent) root.goToToday()
+      // Follow the month without clearing a picked forecast day.
+      if (wasCurrent) { root.viewYear = date.getFullYear(); root.viewMonth = date.getMonth() }
       if (root.opened) root.refresh()
     }
   }
@@ -248,7 +316,11 @@ Panel {
       anchors.fill: parent
       // While Customize is showing, navigation keys drive its cursor;
       // otherwise they keep their calendar/panel meaning.
-      onCloseRequested: { if (root.customizing) root.customizing = false; else root.close() }
+      onCloseRequested: {
+        if (root.customizing) root.customizing = false
+        else if (root.focusIndex >= 0) root.focusIndex = -1
+        else root.close()
+      }
       onActivateRequested: { if (root.customizing) customizeView.activate(); else root.goToToday() }
       onMoveRequested: function(dx, dy) {
         if (root.customizing) customizeView.move(dx, dy)
@@ -264,6 +336,7 @@ Panel {
         else if (root.customizing) return
         else if (k === "t") root.goToToday()
         else if (k === "w") root.toggleWeekStart()
+        else if (k >= "1" && k <= "9") root.focusCity(Number(k) - 1)
       }
 
       Flickable {
@@ -297,8 +370,12 @@ Panel {
             weekdays: root.weekdays
             expanded: !root.compactCalendar
             moodTitle: root.moodTitle
+            moodNext: root.moodNext
             moodDetail: root.moodDetail
-            type: root.type
+            moodPicked: root.pickedDay !== null
+            forecast: root.calendarForecast
+            selectedKey: root.selectedDayKey
+            sans: root.sans
             ink: root.ink
             dim: root.dim
             surface: root.raised
@@ -306,6 +383,7 @@ Panel {
             onPreviousMonth: root.moveMonth(-1)
             onNextMonth: root.moveMonth(1)
             onGoToday: root.goToToday()
+            onPickDay: function(key) { root.pickDay(key) }
           }
 
           Rectangle {
@@ -328,14 +406,16 @@ Panel {
               height: Style.space(26)
               Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.type.upper ? "WORLD" : "World"
+                width: parent.width - styleNote.width - Style.space(12)
+                elide: Text.ElideRight
+                text: root.focusIndex >= 0 && root.worldClocks[root.focusIndex] ? root.worldClocks[root.focusIndex].city : "World"
                 color: root.ink
-                font.family: root.type.family
-                font.pixelSize: Style.font.heading
-                font.letterSpacing: root.type.track
-                font.bold: true
+                font.family: root.sans
+                font.pixelSize: Style.space(20)
+                font.weight: Font.Medium
               }
               Row {
+                id: styleNote
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Style.space(6)
@@ -358,7 +438,7 @@ Panel {
 
             Grid {
               id: cities
-              visible: !root.customizing
+              visible: !root.customizing && root.focusIndex < 0
               width: parent.width
               columns: width >= Style.space(600) ? Math.max(1, Math.min(4, root.worldClocks.length)) : 2
               columnSpacing: Style.space(14)
@@ -369,21 +449,50 @@ Panel {
                 model: root.worldClocks
                 CityCard {
                   required property var modelData
+                  required property int index
                   width: cities.cardWidth
                   row: modelData
                   utcMs: root.nowMs
                   offsetMinutes: Sky.rowOffset(modelData, root.nowMs)
                   compact: root.compactClocks
+                  weatherExpanded: root.weatherExpanded
+                  clickable: true
+                  onFocusRequested: root.focusCity(index)
                   h24: root.h24
                   imperial: root.imperial
                   animate: root.motion && root.opened && !root.customizing
                   style: root.windowStyle
                   pal: root.pal
-                  type: root.type
+                  sans: root.sans
                   ink: root.ink
                   dim: root.dim
+                  line: root.line
+                  warm: root.warm
                 }
               }
+            }
+
+            CityFocus {
+              visible: !root.customizing && root.focusIndex >= 0 && root.focusIndex < root.worldClocks.length
+              width: parent.width
+              height: visible ? implicitHeight : 0
+              row: visible ? root.worldClocks[root.focusIndex] : ({})
+              utcMs: root.nowMs
+              offsetMinutes: visible ? Sky.rowOffset(row, root.nowMs) : 0
+              h24: root.h24
+              imperial: root.imperial
+              animate: root.motion && root.opened && visible
+              style: root.windowStyle
+              pal: root.pal
+              sans: root.sans
+              ink: root.ink
+              dim: root.dim
+              line: root.line
+              surface: root.raised
+              warm: root.warm
+              weekView: root.weekView
+              onBack: root.focusIndex = -1
+              onWeekViewPicked: function(view) { root.weekView = view }
             }
 
             Text {
@@ -402,6 +511,7 @@ Panel {
               style: root.windowStyle
               pal: root.pal
               ink: root.ink
+              dim: root.dim
               surface: root.surfaceColor
             }
 
@@ -421,7 +531,7 @@ Panel {
               Text {
                 id: footRight
                 anchors.right: parent.right
-                text: "C customize · Esc close"
+                text: root.focusIndex >= 0 ? "C customize · Esc back" : "1–" + Math.min(9, root.worldClocks.length) + " city · C customize · Esc close"
                 color: root.dim
                 font.family: Style.font.family
                 font.pixelSize: Style.font.caption

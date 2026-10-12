@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fetch independent city forecasts with a 15-minute last-good disk cache."""
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
@@ -81,17 +81,22 @@ def fetch(location):
         row['updated'] = cached['updated']
     except (OSError, ValueError, KeyError):
         cached = {}
-    if time.time() - cached.get('updated', 0) < 900:
+    # Reports cached before the forecast fields existed are refetched early.
+    complete = 'hourly' in (cached.get('report') or {})
+    if complete and time.time() - cached.get('updated', 0) < 900:
         return row
     params = dict(latitude=location['latitude'], longitude=location['longitude'], timezone='auto' if location.get('_autoTimezone') else location['zone'],
                   current='temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day',
-                  daily='weather_code,temperature_2m_max,temperature_2m_min', forecast_days=4)
+                  daily='weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset',
+                  hourly='temperature_2m,precipitation_probability,weather_code',
+                  forecast_days=7, forecast_hours=25)
     try:
         request = Request('https://api.open-meteo.com/v1/forecast?' + urlencode(params), headers={'User-Agent':'Omarchy-Worldscape/0.1'})
         with urlopen(request, timeout=12) as response:
             report = json.load(response)
         if report.get('current', {}).get('temperature_2m') is None:
             raise ValueError('Missing current weather')
+        add_hour_offsets(report)
         row.update(report=report, updated=time.time())
         CACHE.mkdir(parents=True, exist_ok=True)
         temporary = path.with_suffix('.' + str(os.getpid()) + '.tmp')
@@ -100,6 +105,28 @@ def fetch(location):
     except Exception:
         row.update(stale=bool(row['report']), error='Offline · cached forecast' if row['report'] else 'Weather unavailable · retrying')
     return row
+
+def add_hour_offsets(report):
+    """Record each hourly slot's real UTC offset (minutes) from tzdata.
+
+    Open-Meteo writes every hourly time in the offset in force at request
+    time, so hours past a DST change would otherwise be labelled an hour off.
+    """
+    hourly = report.get('hourly') or {}
+    fetched = report.get('utc_offset_seconds')
+    try:
+        zone = ZoneInfo(report.get('timezone') or '')
+        fetched = int(fetched)
+    except Exception:
+        return
+    offsets = []
+    for stamp in hourly.get('time') or []:
+        try:
+            start = datetime.fromisoformat(stamp).replace(tzinfo=timezone.utc) - timedelta(seconds=fetched)
+            offsets.append(int(start.astimezone(zone).utcoffset().total_seconds() // 60))
+        except Exception:
+            offsets.append(None)
+    hourly['utc_offset_minutes'] = offsets
 
 def update_local_time(row):
     # A detected US city can be outside Pacific time. Use its forecast zone.

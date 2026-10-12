@@ -58,10 +58,19 @@ implementation.
   or moon follows its arc, lamps come on at dusk, and the Open-Meteo condition
   adds cloud, rain, snow, fog or lightning.
 - **On the sill.** City, local time, phase · day · timezone · offset from you,
-  current condition and temperature, a one-line mood, and today's high/low.
-- **Calendar.** Weekday headline, a home mood card (condition, temperature,
-  next sunrise or sunset) and a navigable month grid.
-- **Day ribbon.** Every city placed on one 24-hour band coloured by the home sky.
+  current condition and temperature, then what changes next ("Rain from
+  ~21:00 · 70%", "Clearing by ~18:00", "Up to 37° by 15:00", frost), or the
+  one-line mood when nothing does. A strip shows today and the next three days
+  with high/low and rain chance (from 30%).
+- **City focus.** Click a city card or press **1–4** for a large window, the
+  next 24 hours as a temperature line over rain-chance bars, and seven days as
+  range bars on one shared scale or as small windows drawn with each day's
+  weather. **Esc** returns to all cities.
+- **Calendar.** Weekday headline, a home weather card (condition, temperature,
+  what's next, sunrise or sunset, tomorrow's range) and a navigable month grid.
+  The next seven dates carry the home forecast; click one to preview that day.
+- **Day ribbon.** Every city placed on one 24-hour band coloured by the home sky,
+  labelled with its name and time, with home sunrise and sunset ticks.
 - **Honest weather states.** With no forecast the window shows a muted sky
   with a faint sun/moon (time is known, conditions are not) and says
   "No forecast". Offline, the last saved forecast is used and labelled.
@@ -71,10 +80,11 @@ scene's daylight is independent, so a light desktop can show a moonlit city.
 
 ### Window styles and Auto
 
-Four styles change the frame, the scene treatment and the typography:
-**Glass** (arched window, smooth sky), **Woodblock** (matted print, banded sky,
-serif), **Ink** (ruled frame, line drawing, small caps) and **Neon** (glowing
-edge, striped sun, horizon grid, monospace).
+Four styles change the frame and the scene treatment: **Glass** (arched
+window, smooth sky), **Woodblock** (matted print, banded sky), **Ink** (ruled
+frame, line drawing) and **Neon** (glowing edge, striped sun, horizon grid).
+Typography stays the same in every style, to keep the panel easy to read: the
+desktop sans for names, time and prose, the shell's monospace for data.
 
 **Auto** is the default. It reads the live theme palette (and reacts when you
 switch themes). For installed Omarchy themes it uses a curated pick, for
@@ -93,6 +103,7 @@ Click the gear (or press **C**) in the panel. Choices are saved in this widget's
 | Window style | Auto, Glass, Woodblock, Ink, Neon |
 | Motion | Animated, Quiet |
 | World clocks | Expanded, Compact |
+| Weather | Expanded (next change and forecast strip), Compact (current only) |
 | Time | 12-hour, 24-hour |
 | Temperature | °C · km/h, °F · mph |
 | Calendar | Expanded, Compact, Hidden |
@@ -104,8 +115,8 @@ Click the gear (or press **C**) in the panel. Choices are saved in this widget's
 panel is open, and Quiet keeps a still frame (rain streaks and a lightning bolt
 remain visible).
 
-Keys in the panel: **T**/Enter today, **← →** month, **W** week start, **C**
-Customize, **Esc** close. Inside Customize: **↑ ↓** row, **← →** option,
+Keys in the panel: **T**/Enter today, **← →** month, **W** week start, **1–4**
+city focus, **C** Customize, **Esc** back from a city or close. Inside Customize: **↑ ↓** row, **← →** option,
 **Enter**/Space apply, **Tab**/Shift+Tab next/previous row (including Reset and
 Done), **Esc** or **C** back. The widget's IPC target
 `io.github.binarysentient.worldscape` exposes `open`, `close`, `toggle`,
@@ -158,7 +169,8 @@ The current implementation assumes four cards; arbitrary city counts and an
 in-widget location editor are planned. Update `country` alongside city/coordinates.
 
 Weather requests go directly to [Open-Meteo](https://open-meteo.com/), using the
-configured coordinates. Forecasts are cached for 15 minutes in
+configured coordinates. Each request asks for current conditions, seven days and the next 25 hours.
+Forecasts are cached for 15 minutes in
 `$XDG_CACHE_HOME/omarchy-worldscape` (normally `~/.cache/omarchy-worldscape`).
 The clock reads local timezone data and cached weather without waiting on network
 requests. Weather refreshes happen separately; the last forecast is retained offline.

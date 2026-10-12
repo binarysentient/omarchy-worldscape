@@ -10,10 +10,12 @@ First native QML implementation of the Opus design study
 | `BarWidget.qml` | Bar label and formats (unchanged behaviour), popup host, IPC (adds `customize`). |
 | `Panel.qml` | Preferences, Auto resolution, data processes, layout, keyboard. |
 | `CalendarCard.qml` | Weekday headline, home mood card, month grid. |
-| `CityCard.qml` | One window plus the information sill below it. |
+| `CityCard.qml` | One window plus the information sill below it: next change, four-day strip. The whole card opens the focus view. |
+| `CityFocus.qml` | One city up close: large window, 24-hour chart, seven days as range bars or panes. |
+| `Forecast.js` | Daily/hourly reading, keyed to each city's date, DST-safe hour matching, the "what's next" rule. |
 | `CityWindow.qml` | The artwork: frame mask, still Canvas, animated overlays. |
 | `Cloud.qml` | One drifting cloud. |
-| `DayRibbon.qml` | 24-hour band with a marker per city. |
+| `DayRibbon.qml` | 24-hour band with a labelled marker per city and home sunrise/sunset ticks. |
 | `CustomizeView.qml`, `Choice.qml` | The Customize sheet and its option rows. |
 | `Sky.js` | Colour mixing, solar times, sky keyframes, phases, weather kinds, city clock. |
 | `Skylines.js` | Silhouette data per city and a tiny SVG-path tracer for Canvas. |
@@ -52,7 +54,7 @@ Motion is Animated and Customize is not showing. The arched frame is a
 
 | Where | Keys |
 | --- | --- |
-| Panel | **T**/Enter/Space today · **← →** (or h/l, ↑↓, j/k) month · **W** week start · **C** Customize · **Tab**/Shift+Tab switch shell panels · **Esc** close |
+| Panel | **T**/Enter/Space today · **← →** (or h/l, ↑↓, j/k) month · **W** week start · **1–4** city focus · **C** Customize · **Tab**/Shift+Tab switch shell panels · **Esc** back from a city, then close |
 | Customize | **↑ ↓** row · **← →** option · **Enter**/Space apply · **Tab**/Shift+Tab next/previous row (wraps) · **C** or **Esc** back to the panel |
 
 Customize uses an explicit cursor (`cursorRow`, `cursorCol` in
@@ -66,7 +68,7 @@ lines at narrow widths, beside a fixed-width label that also wraps.
 ## Settings keys (shell.json entry)
 
 `style` (auto|glass|woodblock|ink|neon), `motion` (animated|quiet), `clockLayout`
-(expanded|compact), `calendar` (show|hide), `calendarLayout` (expanded|compact),
+(expanded|compact), `weatherLayout` (expanded|compact), `calendar` (show|hide), `calendarLayout` (expanded|compact),
 `hours` (24|12), `unit` (metric|imperial), `weekStartDay`, `format`, `barWeather`.
 Missing keys mean the default.
 
@@ -104,9 +106,12 @@ This iteration is not marketplace-ready.
 ## Known gaps
 
 - Exactly what `locations.json` lists; no in-panel city editor yet.
-- Sunrise/sunset are computed, not taken from Open-Meteo; accurate to minutes.
-- Generic `serif`/`sans-serif` families are used for Woodblock/Glass/Ink type,
-  so the exact face depends on the system's fontconfig defaults.
+- Window skies use computed sunrise/sunset (accurate to minutes, works offline);
+  the home card shows Open-Meteo's times when the forecast has them.
+- Text uses the generic `sans-serif` family, so the exact face depends on the
+  system's fontconfig defaults.
+- The "what's next" line looks 12 hours ahead with fixed thresholds (wet hour at
+  ≥40%, heat ≥32 °C, frost ≤0 °C); it is a reading aid, not a weather warning.
 - Canvas art is drawn at logical resolution; on fractional/HiDPI scales it may
   look softer than vector text.
 - Palette pinning from the study is not shipped: the palette always follows

@@ -7,17 +7,20 @@ import "Sky.js" as Sky
 Item {
   id: root
 
-  property var cities: []     // [{ name, hour, local }]
+  property var cities: []     // [{ name, hour, local, time }]
   property var sun: ({ sunrise: 6.5, sunset: 18.5, polar: "" })
   property string style: "glass"
   property var pal: ({ bg: "#000000", fg: "#ffffff", accent: "#7aa2f7", warm: "#e0af68", green: "#9ece6a" })
   property color ink: Color.popups.text
   property color surface: Color.popups.background
+  property color dim: ink
+  property color accent: Color.accent
   property string fontFamily: Style.font.family
 
-  implicitHeight: Style.space(40)
+  readonly property var ordered: cities.slice().sort(function(a, b) { return a.hour - b.hour })
+  implicitHeight: bandY + bandH + Style.space(7) + Style.font.caption + Style.space(6)
 
-  readonly property real bandY: Style.space(8)
+  readonly property real bandY: Style.font.caption + Style.space(10)
   readonly property real bandH: Style.space(8)
   readonly property string paintKey: [width, style, JSON.stringify(pal), sun.sunrise.toFixed(2), sun.sunset.toFixed(2), sun.polar].join("|")
   onPaintKeyChanged: band.requestPaint()
@@ -44,40 +47,54 @@ Item {
     }
   }
 
+  // Sunrise and sunset at home, as small ticks through the band.
   Repeater {
-    model: root.cities
+    model: root.sun.polar ? [] : [root.sun.sunrise, root.sun.sunset]
     Rectangle {
-      required property var modelData
-      readonly property real d: Style.space(18)
-      width: d; height: d; radius: d / 2
-      x: Math.max(0, Math.min(root.width - d, modelData.hour / 24 * root.width - d / 2))
-      y: root.bandY + root.bandH / 2 - d / 2
-      color: root.surface
-      border.width: Math.max(1, Style.space(2))
-      border.color: modelData.local ? Color.accent : Util.alpha(root.ink, 0.6)
-      Text {
-        anchors.centerIn: parent
-        text: String(parent.modelData.name || "?").charAt(0)
-        color: root.ink
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
-        font.bold: true
-      }
+      required property real modelData
+      x: Math.round(modelData / 24 * root.width)
+      y: root.bandY - Style.space(4)
+      width: 1; height: root.bandH + Style.space(8)
+      color: root.dim
     }
   }
 
+  // A dot per city on its local hour; labels alternate above and below the
+  // band (in hour order) so neighbours don't collide, and stay inside the
+  // ribbon at the ends.
   Repeater {
-    model: ["00", "06", "12", "18", "24"]
-    Text {
-      required property string modelData
+    model: root.ordered
+    Item {
+      id: mark
+      required property var modelData
       required property int index
-      x: index / 4 * root.width - implicitWidth * index / 4
-      y: root.bandY + root.bandH + Style.space(9)
-      text: modelData
-      color: root.ink
-      opacity: 0.55
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.caption
+      readonly property real cx: modelData.hour / 24 * root.width
+      readonly property real d: Style.space(12)
+      Rectangle {
+        x: Math.max(0, Math.min(root.width - mark.d, mark.cx - mark.d / 2))
+        y: root.bandY + root.bandH / 2 - mark.d / 2
+        width: mark.d; height: mark.d; radius: mark.d / 2
+        color: mark.modelData.local ? root.accent : root.surface
+        border.width: Math.max(1, Style.space(2))
+        border.color: mark.modelData.local ? root.accent : root.ink
+      }
+      Row {
+        x: Math.max(0, Math.min(root.width - width, mark.cx - width / 2))
+        y: mark.index % 2 === 0 ? 0 : root.bandY + root.bandH + Style.space(7)
+        spacing: Style.space(5)
+        Text {
+          text: mark.modelData.name + (mark.modelData.local ? " (you)" : "")
+          color: mark.modelData.local ? root.accent : root.ink
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+        Text {
+          text: mark.modelData.time || ""
+          color: root.dim
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+      }
     }
   }
 }
