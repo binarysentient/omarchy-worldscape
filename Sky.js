@@ -187,7 +187,9 @@ function cityTime(utcMs, offsetMinutes, h24) {
     hour: h + m / 60,
     text: h24 ? ((h < 10 ? "0" : "") + h + ":" + mm) : ((h % 12 || 12) + ":" + mm),
     suffix: h24 ? "" : (h < 12 ? "AM" : "PM"),
-    day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getUTCDay()] + " " + d.getUTCDate()
+    day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getUTCDay()] + " " + d.getUTCDate(),
+    date: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getUTCDay()] + " " + d.getUTCDate() + " "
+      + ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getUTCMonth()]
   }
 }
 

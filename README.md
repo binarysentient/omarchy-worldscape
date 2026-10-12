@@ -57,7 +57,7 @@ implementation.
   using sunrise/sunset calculated locally from each city's coordinates. The sun
   or moon follows its arc, lamps come on at dusk, and the Open-Meteo condition
   adds cloud, rain, snow, fog or lightning.
-- **On the sill.** City, local time, phase · day · timezone · offset from you,
+- **On the sill.** City, local time, date · timezone · offset from you,
   current condition and temperature, then what changes next ("Rain from
   ~21:00 · 70%", "Clearing by ~18:00", "Up to 37° by 15:00", frost), or the
   one-line mood when nothing does. A strip shows today and the next three days

@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Worldscape Forecast Studies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -404,7 +404,7 @@ function calendar(E) {
 function timeBlock(c) {
   return `<div class="name${c.home ? " home" : ""}">${c.city}</div>
     <div class="time">${hhmm(c.hour)}</div>
-    <div class="cap">${phase(c.hour, c.sr, c.ss)} · ${c.day} · ${c.zone}${c.diff ? " · " + c.diff : ""}</div>`;
+    <div class="cap">${c.day} Oct · ${c.zone}${c.diff ? " · " + c.diff : ""}</div>`;
 }
 function sill(c, E) { return timeBlock(c) + weatherBlock(c, E); }
 function weatherBlock(c, E) {

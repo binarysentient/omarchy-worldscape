@@ -135,7 +135,8 @@ Item {
 
       Text {
         width: parent.width
-        text: Sky.phase(art.hour, art.sun) + " · " + root.clock.day + " · " + (root.row.abbreviation || "")
+        // The window already shows the time of day; the caption is the date.
+      text: root.clock.date + " · " + (root.row.abbreviation || "")
           + (!root.row.local && root.row.difference ? " · " + root.row.difference : "")
         elide: Text.ElideRight
         color: root.dim
