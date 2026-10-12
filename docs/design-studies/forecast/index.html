@@ -97,6 +97,7 @@ button:focus-visible, .chip:focus-within, canvas:focus-visible, .day:focus-visib
 .name.home { color: var(--ink); font-weight: 600; }
 .name.home::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .time { font-size: 42px; font-weight: 300; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.cap .cd { color: var(--ink); }
 .cap { font: 11.5px var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cond { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
 .cond svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
@@ -404,7 +405,7 @@ function calendar(E) {
 function timeBlock(c) {
   return `<div class="name${c.home ? " home" : ""}">${c.city}</div>
     <div class="time">${hhmm(c.hour)}</div>
-    <div class="cap">${c.day} Oct · ${c.zone}${c.diff ? " · " + c.diff : ""}</div>`;
+    <div class="cap"><span class="cd">${c.day} Oct</span> · ${c.zone}${c.diff ? " · " + c.diff : ""}</div>`;
 }
 function sill(c, E) { return timeBlock(c) + weatherBlock(c, E); }
 function weatherBlock(c, E) {

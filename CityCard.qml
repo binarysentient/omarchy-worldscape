@@ -133,15 +133,26 @@ Item {
         }
       }
 
-      Text {
+      // The window already shows the time of day; the caption is the date,
+      // in the clock's colour, then the zone and offset.
+      Row {
         width: parent.width
-        // The window already shows the time of day; the caption is the date.
-      text: root.clock.date + " · " + (root.row.abbreviation || "")
-          + (!root.row.local && root.row.difference ? " · " + root.row.difference : "")
-        elide: Text.ElideRight
-        color: root.dim
-        font.family: root.mono
-        font.pixelSize: Style.font.caption
+        Text {
+          id: cityDate
+          text: root.clock.date
+          color: root.ink
+          font.family: root.mono
+          font.pixelSize: Style.font.caption
+        }
+        Text {
+          width: parent.width - cityDate.width
+          text: " · " + (root.row.abbreviation || "")
+            + (!root.row.local && root.row.difference ? " · " + root.row.difference : "")
+          elide: Text.ElideRight
+          color: root.dim
+          font.family: root.mono
+          font.pixelSize: Style.font.caption
+        }
       }
 
       Row {
