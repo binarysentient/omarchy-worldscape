@@ -9,9 +9,9 @@ import "Sky.js" as Sky
 import "Forecast.js" as Forecast
 import "ThemeMatch.js" as ThemeMatch
 
-// Windows on the world: the calendar and home mood on the left, a window per
-// city on the right with its time and weather on the sill below, and a day
-// ribbon that places every city on one 24-hour band. Clicking a window (or
+// Windows on the world: the calendar and home weather on the left; on the
+// right a day ribbon placing every city on one 24-hour band, then a card per
+// city reading time, window, weather. Clicking a window (or
 // pressing 1–4) opens that city's focus view with hourly and weekly detail.
 Panel {
   id: root
@@ -436,6 +436,19 @@ Panel {
               }
             }
 
+            // The day band sits with the clocks: every city's hour first.
+            DayRibbon {
+              visible: !root.customizing && root.worldClocks.length > 0
+              width: parent.width
+              cities: root.ribbonCities
+              sun: root.homeSun
+              style: root.windowStyle
+              pal: root.pal
+              ink: root.ink
+              dim: root.dim
+              surface: root.surfaceColor
+            }
+
             Grid {
               id: cities
               visible: !root.customizing && root.focusIndex < 0
@@ -501,18 +514,6 @@ Panel {
               color: root.dim
               font.family: Style.font.family
               font.pixelSize: Style.font.body
-            }
-
-            DayRibbon {
-              visible: !root.customizing && root.worldClocks.length > 0
-              width: parent.width
-              cities: root.ribbonCities
-              sun: root.homeSun
-              style: root.windowStyle
-              pal: root.pal
-              ink: root.ink
-              dim: root.dim
-              surface: root.surfaceColor
             }
 
             Item {

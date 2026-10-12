@@ -10,7 +10,7 @@ First native QML implementation of the Opus design study
 | `BarWidget.qml` | Bar label and formats (unchanged behaviour), popup host, IPC (adds `customize`). |
 | `Panel.qml` | Preferences, Auto resolution, data processes, layout, keyboard. |
 | `CalendarCard.qml` | Weekday headline, home mood card, month grid. |
-| `CityCard.qml` | One window plus the information sill below it: next change, four-day strip. The whole card opens the focus view. |
+| `CityCard.qml` | One city read top to bottom: city, time and date; the window; weather now, next change and a four-day strip. The whole card opens the focus view. |
 | `CityFocus.qml` | One city up close: large window, 24-hour chart, seven days as range bars or panes. |
 | `Forecast.js` | Daily/hourly reading, keyed to each city's date, DST-safe hour matching, the "what's next" rule. |
 | `CityWindow.qml` | The artwork: frame mask, still Canvas, animated overlays. |

@@ -5,8 +5,8 @@ one panel, with light and dark palettes inherited from your desktop theme.
 
 **Development preview — not a stable release.** The native widget implements a
 first iteration of the *Windows on the world* design: each city is an illustrated
-window whose sky follows that city's real time of day and current weather, with
-time and forecast on the "sill" below. The repository has not been submitted to
+window whose sky follows that city's real time of day and current weather. Each
+card reads top to bottom: time, the window, then the weather. The repository has not been submitted to
 the Omarchy plugin marketplace. See [docs/NATIVE-ITERATION.md](docs/NATIVE-ITERATION.md)
 for how it is built and what is not done yet.
 
@@ -17,11 +17,15 @@ live; each city keeps its own daylight regardless of the interface palette.
 
 **Tokyo Night · Glass**
 
-![Worldscape in Tokyo Night with arched Glass city windows](docs/screenshots/tokyo-night.png)
+![Worldscape in Tokyo Night: day ribbon and clocks above arched Glass windows, with each city's weather, next change and four-day strip below](docs/screenshots/tokyo-night.png)
+
+**Tokyo Night · city focus** (click a card or press 1–4)
+
+![Brampton in focus: a large window, the next 24 hours as a temperature line over rain-chance bars, and seven days as range bars](docs/screenshots/tokyo-night-focus.png)
 
 **Flexoki Light · Ink**
 
-![Worldscape in Flexoki Light with illustrated Ink city windows](docs/screenshots/flexoki-light.png)
+![Worldscape in Flexoki Light with line-drawn Ink city windows and forecast glyphs on the calendar](docs/screenshots/flexoki-light.png)
 
 **Retro 82 · Neon**
 
@@ -57,8 +61,9 @@ implementation.
   using sunrise/sunset calculated locally from each city's coordinates. The sun
   or moon follows its arc, lamps come on at dusk, and the Open-Meteo condition
   adds cloud, rain, snow, fog or lightning.
-- **On the sill.** City, local time, date · timezone · offset from you,
-  current condition and temperature, then what changes next ("Rain from
+- **Above the window.** City, local time, and date · timezone · offset from you.
+  The day ribbon sits above the cards, with the clocks.
+- **Below the window.** Current condition and temperature, then what changes next ("Rain from
   ~21:00 · 70%", "Clearing by ~18:00", "Up to 37° by 15:00", frost), or the
   one-line mood when nothing does. A strip shows today and the next three days
   with high/low and rain chance (from 30%).

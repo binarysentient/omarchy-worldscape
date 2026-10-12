@@ -4,8 +4,9 @@ import "Sky.js" as Sky
 import "Forecast.js" as Forecast
 import "WeatherModel.js" as WeatherModel
 
-// A city window with its information on the sill below. Text always sits on
-// the panel's own background, never on the artwork. Two faces only: the
+// A city card read top to bottom: when (city, time, date), the window that
+// shows both time of day and weather, then the weather itself. Text always
+// sits on the panel's own background, never on the artwork. Two faces only: the
 // desktop sans for names, time and prose; the shell's mono for data. When
 // `clickable`, the whole card opens the city's focus view.
 Item {
@@ -72,23 +73,7 @@ Item {
     width: root.width
     spacing: Style.space(8)
 
-    CityWindow {
-      id: art
-      width: root.width
-      height: root.windowHeight
-      city: root.row.city || ""
-      region: root.row.region || ""
-      latitude: root.row.latitude
-      longitude: root.row.longitude
-      utcMs: root.utcMs
-      offsetMinutes: root.offsetMinutes
-      weatherCode: root.hasWeather ? root.current.weather_code : null
-      style: root.style
-      compact: root.compact
-      animate: root.animate
-      pal: root.pal
-    }
-
+    // When: city, time, date.
     Column {
       width: root.width
       spacing: Style.space(2)
@@ -154,11 +139,33 @@ Item {
           font.pixelSize: Style.font.caption
         }
       }
+    }
+
+    CityWindow {
+      id: art
+      width: root.width
+      height: root.windowHeight
+      city: root.row.city || ""
+      region: root.row.region || ""
+      latitude: root.row.latitude
+      longitude: root.row.longitude
+      utcMs: root.utcMs
+      offsetMinutes: root.offsetMinutes
+      weatherCode: root.hasWeather ? root.current.weather_code : null
+      style: root.style
+      compact: root.compact
+      animate: root.animate
+      pal: root.pal
+    }
+
+    // Weather under the window: now, what changes next, the coming days.
+    Column {
+      width: root.width
+      spacing: Style.space(2)
 
       Row {
         width: parent.width
         spacing: Style.space(6)
-        topPadding: Style.space(4)
         Text {
           text: root.hasWeather ? WeatherModel.iconForOpenMeteoCode(root.current.weather_code, root.current.is_day === 0) : "—"
           color: root.hasWeather ? root.accent : root.dim
