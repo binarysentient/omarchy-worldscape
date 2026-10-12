@@ -19,17 +19,15 @@ live; each city keeps its own daylight regardless of the interface palette.
 
 ![Worldscape in Tokyo Night: day ribbon and clocks above arched Glass windows, with each city's weather, next change and four-day strip below](docs/screenshots/tokyo-night.png)
 
-**Tokyo Night · city focus** (click a card or press 1–4)
-
-![Brampton in focus: a large window, the next 24 hours as a temperature line over rain-chance bars, and seven days as range bars](docs/screenshots/tokyo-night-focus.png)
+![Brampton in focus in Tokyo Night: a large window, the next 24 hours as a temperature line over rain-chance bars, and seven days as range bars](docs/screenshots/tokyo-night-focus.png)
 
 **Flexoki Light · Ink**
 
 ![Worldscape in Flexoki Light with line-drawn Ink city windows and forecast glyphs on the calendar](docs/screenshots/flexoki-light.png)
 
-**Retro 82 · Neon**
+![London in focus in Flexoki Light: an Ink window at night, the next 24 hours and the week's range bars](docs/screenshots/flexoki-light-focus.png)
 
-![Worldscape in Retro 82 with glowing Neon city windows](docs/screenshots/retro-82.png)
+Click a city card or press **1–4** for its detail view; **Esc** returns.
 
 ## Opinionated by default. Malleable by design.
 
